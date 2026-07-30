@@ -1,69 +1,71 @@
 import React, { useState } from "react";
-import { X, Sparkles, Send, AlertCircle, Heart, CheckCircle2 } from "lucide-react";
-import confetti from "canvas-confetti";
 import { useAuth } from "../context/useAuth";
 import { sendTipTransaction } from "../firebase/services";
+import { Sparkles, Heart, CheckCircle2, AlertCircle, X, Send, QrCode, CreditCard, Info } from "lucide-react";
+import confetti from "canvas-confetti";
 
 export default function TipModal({ artist, onClose, onSuccess }) {
-  const { currentUser, userProfile, signInWithGoogle, refreshUserProfile } = useAuth();
+  const { currentUser, userProfile, setUserProfile } = useAuth();
   
-  const [selectedAmount, setSelectedAmount] = useState(100);
-  const [customAmount, setCustomAmount] = useState("");
+  // モード選択: 'point' (アプリ内ポイント) | 'paypay' (PayPay直送)
+  const [tipMode, setTipMode] = useState("point");
+  
+  const [amount, setAmount] = useState(500);
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [error, setError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const presetAmounts = [100, 300, 500];
+  const presetAmounts = [100, 300, 500, 1000, 3000];
 
-  const handleSendTip = async (e) => {
+  // 紙吹雪アニメーション
+  const triggerConfetti = () => {
+    confetti({
+      particleCount: 80,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ["#ff2a85", "#00f0ff", "#9d4edd", "#ffd166"]
+    });
+  };
+
+  const handleSubmitPointTip = async (e) => {
     e.preventDefault();
-    if (!currentUser) return;
+    setError("");
 
-    const amount = customAmount ? parseInt(customAmount, 10) : selectedAmount;
-    if (isNaN(amount) || amount <= 0) {
-      setErrorMessage("有効なポイント数を入力してください。");
+    if (!currentUser) {
+      setError("ポイント送金にはログインが必要です。マイページよりログインしてください。");
       return;
     }
 
-    const currentPoints = userProfile?.points ?? 0;
-    if (currentPoints < amount) {
-      setErrorMessage(`ポイントが不足しています（現在: ${currentPoints}pt）`);
+    if ((userProfile?.points || 0) < amount) {
+      setError(`ポイントが不足しています。（保有: ${userProfile?.points || 0} pt）`);
       return;
     }
-
-    setIsSubmitting(true);
-    setErrorMessage("");
 
     try {
-      // 要件4: Firestore Transaction の呼び出し
-      await sendTipTransaction({
+      setIsSubmitting(true);
+      const result = await sendTipTransaction({
         userId: currentUser.uid,
         userProfile,
         artistId: artist.id,
         amount,
-        message: message.trim() || "LIVE SUPPORT! 🔥"
+        message
       });
 
-      // 紙吹雪アニメーション
-      confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#FF007F', '#9D4EDD', '#00F5FF', '#FFEE32']
-      });
+      if (result.success) {
+        if (result.newPoints !== undefined) {
+          setUserProfile({ ...userProfile, points: result.newPoints });
+        } else if (result.updatedUser) {
+          setUserProfile(result.updatedUser);
+        }
 
-      setIsSuccess(true);
-      await refreshUserProfile();
-      
-      setTimeout(() => {
+        setIsSuccess(true);
+        triggerConfetti();
         if (onSuccess) onSuccess();
-        onClose();
-      }, 1800);
-
+      }
     } catch (err) {
-      console.error("Tip sending failed:", err);
-      setErrorMessage(err.message || "送信に失敗しました。時間をおいて再試行してください。");
+      console.error(err);
+      setError(err.message || "送金処理に失敗しました。");
     } finally {
       setIsSubmitting(false);
     }
@@ -71,144 +73,196 @@ export default function TipModal({ artist, onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div className="glass-panel-glow w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl relative border border-neon-pink/40">
+      <div className="relative w-full max-w-md bg-dark-card border border-neon-pink/50 rounded-3xl p-6 shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
         
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white p-1 rounded-full bg-dark-bg/60 border border-white/10"
+          className="absolute top-4 right-4 text-gray-400 hover:text-white p-2 rounded-full bg-dark-bg/60 border border-dark-border transition-colors z-10"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
         {isSuccess ? (
-          <div className="p-8 text-center flex flex-col items-center justify-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-neon-pink/20 border-2 border-neon-pink flex items-center justify-center shadow-neon-pink animate-bounce">
-              <CheckCircle2 className="w-10 h-10 text-neon-pink" />
+          /* Success State */
+          <div className="text-center py-6 space-y-4">
+            <div className="w-16 h-16 rounded-full bg-neon-pink/20 border border-neon-pink flex items-center justify-center mx-auto text-neon-pink shadow-neon-pink">
+              <CheckCircle2 className="w-8 h-8" />
             </div>
             <div>
               <h3 className="text-xl font-extrabold text-white">TIP SENT!</h3>
-              <p className="text-sm text-neon-cyan mt-1">{artist.name} へ送付完了</p>
+              <p className="text-xs text-neon-cyan font-mono mt-1">
+                {artist.name} へ {amount} PT を贈りました！
+              </p>
             </div>
-            <p className="text-xs text-gray-400">熱い応援メッセージがフロアに届きました！</p>
+            <p className="text-xs text-gray-300 bg-dark-bg/80 p-3 rounded-2xl border border-dark-border italic">
+              "{message || "応援しています！"}"
+            </p>
+            <button
+              onClick={onClose}
+              className="w-full bg-gradient-to-r from-neon-pink to-neon-purple text-white font-extrabold py-3 rounded-xl shadow-neon-pink transition-all"
+            >
+              閉じる
+            </button>
           </div>
         ) : (
-          <div className="p-5">
-            {/* Header / Artist Info */}
-            <div className="flex items-center gap-3 pb-4 mb-4 border-b border-dark-border">
+          /* Main Tip Form */
+          <div className="space-y-4">
+            
+            {/* Header with Artist Info */}
+            <div className="flex items-center gap-3 border-b border-dark-border pb-4">
               <img
                 src={artist.image}
                 alt={artist.name}
-                className="w-12 h-12 rounded-xl object-cover border border-neon-purple"
+                className="w-12 h-12 rounded-xl object-cover border border-neon-purple shrink-0"
               />
               <div>
-                <span className="text-[10px] text-neon-cyan font-mono font-bold tracking-wider">SUPPORT ARTIST</span>
+                <span className="text-[10px] text-neon-cyan font-mono font-bold block">SUPPORT ARTIST</span>
                 <h3 className="text-base font-extrabold text-white">{artist.name}</h3>
               </div>
             </div>
 
-            {!currentUser ? (
-              <div className="py-6 text-center space-y-4">
-                <p className="text-xs text-gray-300">
-                  ポイント投げ銭でメッセージを送るにはGoogleログインが必要です（初回500ptプレゼント！）
-                </p>
-                <button
-                  onClick={signInWithGoogle}
-                  className="w-full bg-gradient-to-r from-neon-pink to-neon-purple text-white font-bold text-sm py-3 rounded-xl shadow-neon-pink hover:opacity-90 transition-all flex items-center justify-center gap-2"
-                >
-                  <Sparkles className="w-4 h-4 fill-white" />
-                  <span>Googleでログインして投げ銭</span>
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleSendTip} className="space-y-4">
-                {/* User Current Balance Info */}
-                <div className="bg-dark-bg/80 border border-dark-border rounded-xl p-3 flex items-center justify-between">
-                  <span className="text-xs text-gray-400">あなたの保有ポイント</span>
-                  <div className="flex items-center gap-1 font-mono font-bold text-sm text-neon-yellow">
-                    <Sparkles className="w-4 h-4 fill-neon-yellow" />
-                    <span>{userProfile?.points ?? 0}</span>
-                    <span className="text-xs text-gray-400">PT</span>
-                  </div>
-                </div>
+            {/* Tip Mode Switcher (Point vs PayPay) */}
+            <div className="grid grid-cols-2 gap-2 p-1 bg-dark-bg/80 rounded-2xl border border-dark-border font-mono text-xs">
+              <button
+                type="button"
+                onClick={() => setTipMode("point")}
+                className={`py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 ${
+                  tipMode === "point"
+                    ? "bg-gradient-to-r from-neon-pink to-neon-purple text-white shadow-neon-pink"
+                    : "text-gray-400 hover:text-white"
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>アプリPTで贈る</span>
+              </button>
 
-                {/* Amount Select Buttons */}
+              <button
+                type="button"
+                onClick={() => setTipMode("paypay")}
+                className={`py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-1.5 ${
+                  tipMode === "paypay"
+                    ? "bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-lg"
+                    : "text-gray-400 hover:text-white"
+                }`}
+              >
+                <QrCode className="w-3.5 h-3.5" />
+                <span>PayPayで直接贈る</span>
+              </button>
+            </div>
+
+            {/* Mode 1: App Points Tip */}
+            {tipMode === "point" && (
+              <form onSubmit={handleSubmitPointTip} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-mono text-gray-300 mb-2">
-                    送付ポイント数
-                  </label>
-                  <div className="grid grid-cols-3 gap-2 mb-2">
-                    {presetAmounts.map((amt) => (
+                  <div className="flex items-center justify-between text-xs font-mono mb-2">
+                    <span className="text-gray-400">投げ銭ポイント額</span>
+                    <span className="text-neon-yellow font-bold">
+                      保有: {userProfile?.points ?? 0} PT
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-5 gap-1.5 mb-3">
+                    {presetAmounts.map((pt) => (
                       <button
+                        key={pt}
                         type="button"
-                        key={amt}
-                        onClick={() => {
-                          setSelectedAmount(amt);
-                          setCustomAmount("");
-                        }}
-                        className={`py-2 px-3 rounded-xl font-mono text-xs font-bold transition-all border ${
-                          selectedAmount === amt && !customAmount
+                        onClick={() => setAmount(pt)}
+                        className={`py-2 rounded-xl text-xs font-mono font-bold border transition-all ${
+                          amount === pt
                             ? "bg-neon-pink/20 border-neon-pink text-neon-pink shadow-neon-pink"
-                            : "bg-dark-surface border-dark-border text-gray-400 hover:text-white"
+                            : "bg-dark-surface border-dark-border text-gray-300 hover:border-gray-500"
                         }`}
                       >
-                        {amt} PT
+                        {pt}
                       </button>
                     ))}
                   </div>
-                  
-                  {/* Custom Amount Input */}
-                  <input
-                    type="number"
-                    placeholder="カスタムポイントを入力"
-                    value={customAmount}
-                    onChange={(e) => setCustomAmount(e.target.value)}
-                    min="1"
-                    max={userProfile?.points ?? 500}
-                    className="w-full bg-dark-surface border border-dark-border focus:border-neon-cyan text-white text-xs px-3 py-2.5 rounded-xl font-mono focus:outline-none transition-all"
-                  />
                 </div>
 
-                {/* Support Message Input */}
                 <div>
-                  <label className="block text-xs font-mono text-gray-300 mb-1.5">
+                  <label className="text-xs text-gray-400 font-mono block mb-1">
                     応援メッセージ (任意)
                   </label>
                   <textarea
-                    rows={2}
-                    maxLength={100}
-                    placeholder="フロアからの熱いメッセージを！例: 最高のDJセット！🔥"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    className="w-full bg-dark-surface border border-dark-border focus:border-neon-pink text-white text-xs p-3 rounded-xl focus:outline-none transition-all resize-none"
+                    placeholder="プレイ最高です！等の応援コメントを入力"
+                    maxLength={100}
+                    className="w-full bg-dark-surface border border-dark-border focus:border-neon-pink rounded-xl p-3 text-xs text-white placeholder-gray-500 outline-none resize-none h-20 font-sans"
                   />
                 </div>
 
-                {/* Error Banner */}
-                {errorMessage && (
-                  <div className="bg-red-500/10 border border-red-500/50 rounded-xl p-2.5 flex items-center gap-2 text-red-400 text-xs">
-                    <AlertCircle className="w-4 h-4 shrink-0" />
-                    <span>{errorMessage}</span>
+                {error && (
+                  <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/40 rounded-xl text-xs text-red-300 font-mono">
+                    <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+                    <span>{error}</span>
                   </div>
                 )}
 
-                {/* Submit Button */}
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan hover:opacity-95 text-white font-extrabold text-sm py-3.5 rounded-xl shadow-neon-pink flex items-center justify-center gap-2 disabled:opacity-50 transition-all"
+                  className="w-full bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan text-white font-extrabold text-sm py-3.5 rounded-xl shadow-neon-pink hover:opacity-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  {isSubmitting ? (
-                    <span className="animate-pulse">送金処理中 (Transaction)...</span>
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4" />
-                      <span>{customAmount || selectedAmount} PT を送金する</span>
-                    </>
-                  )}
+                  <Send className="w-4 h-4" />
+                  <span>{amount} PT を贈る</span>
                 </button>
               </form>
             )}
+
+            {/* Mode 2: PayPay Direct Tip via QR Code */}
+            {tipMode === "paypay" && (
+              <div className="space-y-4 text-center">
+                <div className="bg-dark-bg/90 border border-red-500/30 p-4 rounded-2xl space-y-3">
+                  <span className="inline-block px-3 py-1 bg-red-500/20 text-red-400 border border-red-500/40 font-mono text-[10px] font-bold rounded-full">
+                    PayPay 投げ銭QRコード
+                  </span>
+
+                  {/* PayPay QR Code Display */}
+                  <div className="relative w-48 h-48 mx-auto bg-white p-2.5 rounded-2xl shadow-xl border-2 border-red-500/50 flex items-center justify-center">
+                    <img
+                      src="/paypay-qr.png"
+                      alt="PayPay 投げ銭 QRコード"
+                      className="w-full h-full object-contain rounded-xl"
+                    />
+                  </div>
+
+                  <p className="text-xs text-gray-200 font-bold">
+                    【金額自由】300円・500円・700円など
+                  </p>
+                </div>
+
+                {/* Instructions Steps */}
+                <div className="bg-dark-surface border border-dark-border p-3.5 rounded-2xl text-left text-xs font-mono space-y-2">
+                  <div className="flex items-center gap-1.5 text-neon-cyan font-bold mb-1">
+                    <Info className="w-4 h-4" />
+                    <span>PayPay 送金手順</span>
+                  </div>
+                  <ol className="space-y-1.5 text-[11px] text-gray-300 list-decimal list-inside leading-relaxed">
+                    <li>PayPayアプリを開き「スキャン」をタップ</li>
+                    <li>上のQRコードを読み取る</li>
+                    <li>お好きな金額を入力して送金</li>
+                    <li className="text-neon-pink font-bold">
+                      メッセージ欄に「{artist.name}」とご入力ください
+                    </li>
+                  </ol>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerConfetti();
+                    onClose();
+                  }}
+                  className="w-full bg-gradient-to-r from-red-500 to-pink-600 text-white font-extrabold text-sm py-3 rounded-xl shadow-lg hover:opacity-90 transition-all flex items-center justify-center gap-2"
+                >
+                  <Heart className="w-4 h-4 fill-white" />
+                  <span>PayPayで送金完了・閉じる</span>
+                </button>
+              </div>
+            )}
+
           </div>
         )}
 

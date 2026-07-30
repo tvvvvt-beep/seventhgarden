@@ -1,6 +1,6 @@
 import React from "react";
 import { EVENT_INFO } from "../firebase/mockData";
-import { Calendar, MapPin, Clock, Ticket, Sparkles, ChevronRight, Volume2, Shield } from "lucide-react";
+import { Calendar, MapPin, Clock, Ticket, Sparkles, ChevronRight, QrCode, Heart } from "lucide-react";
 import ArtistCard from "../components/ArtistCard";
 import RecentTipsFeed from "../components/RecentTipsFeed";
 
@@ -9,10 +9,10 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
 
   return (
     <div className="space-y-6 pb-6 animate-fadeIn max-w-full overflow-hidden">
-      {/* Hero Event Flyer Card (Just-Fit Flyer Image Display) */}
+      {/* Hero Event Flyer Card (Just-Fit Display) */}
       <div className="relative rounded-3xl overflow-hidden glass-panel-glow border border-neon-pink/50 shadow-2xl w-full">
         
-        {/* Title Flyer Image (Properly Contained & Resized Just-Fit) */}
+        {/* Title Flyer Image */}
         <div className="relative w-full bg-black/60 flex items-center justify-center p-2">
           <img
             src={heroImageUrl}
@@ -80,10 +80,37 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
             onClick={() => setActiveTab("lineup")}
             className="w-full bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan text-white font-extrabold text-xs py-3.5 rounded-xl shadow-neon-pink hover:opacity-95 transition-all flex items-center justify-center gap-1.5"
           >
-            <span>タイムテーブル & 出演者一覧を見る</span>
+            <span>出演者一覧を見る</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
+      </div>
+
+      {/* PayPay Support Banner Card */}
+      <div className="bg-gradient-to-r from-red-950/40 via-dark-card to-pink-950/40 border border-red-500/40 p-4 rounded-3xl flex items-center justify-between gap-3 shadow-xl">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-red-500 to-pink-600 flex items-center justify-center text-white shadow-lg shrink-0">
+            <QrCode className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-extrabold text-white">PayPay 投げ銭対応</span>
+              <span className="px-2 py-0.5 bg-red-500/20 text-red-400 text-[9px] font-mono font-bold rounded-full border border-red-500/30">
+                金額自由
+              </span>
+            </div>
+            <p className="text-[11px] text-gray-300 mt-0.5 leading-snug">
+              本日の出演者・DJへPayPayで直接応援チップを送れます。
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => onOpenTipModal(artists[0] || { id: "artist_1", name: "出演アーティスト", image: heroImageUrl })}
+          className="bg-red-500 hover:bg-red-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-md shrink-0 transition-all font-mono"
+        >
+          QRコード表示
+        </button>
       </div>
 
       {/* Featured Artists Section */}
