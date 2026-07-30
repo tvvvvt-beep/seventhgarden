@@ -1,0 +1,121 @@
+import React from "react";
+import { EVENT_INFO } from "../firebase/mockData";
+import { Calendar, MapPin, Clock, Ticket, Sparkles, ChevronRight, Volume2, Shield } from "lucide-react";
+import ArtistCard from "../components/ArtistCard";
+import RecentTipsFeed from "../components/RecentTipsFeed";
+
+export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist, setActiveTab }) {
+  const heroImageUrl = "/hero-banner.jpg";
+
+  return (
+    <div className="space-y-6 pb-6 animate-fadeIn max-w-full overflow-hidden">
+      {/* Hero Event Flyer Card (Just-Fit Flyer Image Display) */}
+      <div className="relative rounded-3xl overflow-hidden glass-panel-glow border border-neon-pink/50 shadow-2xl w-full">
+        
+        {/* Title Flyer Image (Properly Contained & Resized Just-Fit) */}
+        <div className="relative w-full bg-black/60 flex items-center justify-center p-2">
+          <img
+            src={heroImageUrl}
+            alt={EVENT_INFO.title}
+            className="w-full h-auto max-h-72 object-contain rounded-2xl shadow-lg border border-white/10"
+          />
+          <div className="absolute top-4 left-4 z-10 flex gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-dark-bg/80 backdrop-blur-md border border-neon-pink/60 text-neon-pink font-mono text-[10px] font-bold tracking-widest rounded-full shadow-neon-pink">
+              <Sparkles className="w-3 h-3 text-neon-pink" />
+              OFFICIAL FLYER
+            </span>
+            <span className="inline-flex items-center gap-1 px-3 py-1 bg-neon-cyan/20 backdrop-blur-md border border-neon-cyan/60 text-neon-cyan font-mono text-[10px] font-extrabold tracking-widest rounded-full">
+              {EVENT_INFO.entranceFee}
+            </span>
+          </div>
+        </div>
+
+        {/* Content Details Below Flyer Image */}
+        <div className="p-5 text-center">
+          <h2 className="text-2xl font-black tracking-wider text-white bg-gradient-to-r from-white via-pink-200 to-neon-pink bg-clip-text text-transparent mb-1">
+            {EVENT_INFO.title}
+          </h2>
+          <p className="text-xs text-neon-cyan font-mono tracking-widest mb-3 font-bold">
+            {EVENT_INFO.subtitle}
+          </p>
+
+          <p className="text-xs text-gray-300 max-w-xs mx-auto leading-relaxed mb-5 bg-dark-card/60 backdrop-blur-sm p-3 rounded-2xl border border-white/5">
+            {EVENT_INFO.description}
+          </p>
+
+          {/* Event Quick Info Grid */}
+          <div className="grid grid-cols-2 gap-2 text-left text-xs font-mono mb-5">
+            <div className="bg-dark-bg/90 backdrop-blur-md border border-dark-border p-3 rounded-2xl flex items-center gap-2.5 shadow-sm">
+              <Calendar className="w-4 h-4 text-neon-pink shrink-0" />
+              <div>
+                <span className="text-[9px] text-gray-500 block">DATE</span>
+                <span className="text-gray-200 font-bold text-[11px]">{EVENT_INFO.date}</span>
+              </div>
+            </div>
+
+            <div className="bg-dark-bg/90 backdrop-blur-md border border-dark-border p-3 rounded-2xl flex items-center gap-2.5 shadow-sm">
+              <Clock className="w-4 h-4 text-neon-cyan shrink-0" />
+              <div>
+                <span className="text-[9px] text-gray-500 block">TIME</span>
+                <span className="text-gray-200 font-bold text-[11px]">{EVENT_INFO.openTime}</span>
+              </div>
+            </div>
+
+            <div className="bg-dark-bg/90 backdrop-blur-md border border-dark-border p-3 rounded-2xl flex items-center gap-2.5 col-span-2 shadow-sm justify-between">
+              <div className="flex items-center gap-2.5">
+                <MapPin className="w-4 h-4 text-neon-purple shrink-0" />
+                <div>
+                  <span className="text-[9px] text-gray-500 block">VENUE</span>
+                  <span className="text-gray-200 font-bold text-[11px]">{EVENT_INFO.venue}</span>
+                </div>
+              </div>
+              <span className="text-neon-yellow font-bold text-xs bg-neon-purple/20 border border-neon-purple/40 px-2.5 py-1 rounded-xl">
+                {EVENT_INFO.entranceFee}
+              </span>
+            </div>
+          </div>
+
+          {/* Action Button */}
+          <button
+            onClick={() => setActiveTab("lineup")}
+            className="w-full bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan text-white font-extrabold text-xs py-3.5 rounded-xl shadow-neon-pink hover:opacity-95 transition-all flex items-center justify-center gap-1.5"
+          >
+            <span>タイムテーブル & 出演者一覧を見る</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Featured Artists Section */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-base font-extrabold text-white">PICKUP ARTISTS</h3>
+            <p className="text-[10px] text-gray-400 font-mono">今夜注目のDJ / VJ / LIVEラインナップ</p>
+          </div>
+          <button
+            onClick={() => setActiveTab("lineup")}
+            className="text-xs text-neon-cyan font-mono font-bold hover:underline flex items-center gap-0.5"
+          >
+            <span>すべて表示</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          {artists.slice(0, 2).map((artist) => (
+            <ArtistCard
+              key={artist.id}
+              artist={artist}
+              onOpenTipModal={onOpenTipModal}
+              onSelectArtist={onSelectArtist}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Recent Tip Feed */}
+      <RecentTipsFeed tips={tips} />
+    </div>
+  );
+}

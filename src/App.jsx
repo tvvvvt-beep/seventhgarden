@@ -1,0 +1,123 @@
+import React, { useState, useEffect } from "react";
+import { AuthProvider } from "./context/AuthContext";
+import { useAuth } from "./context/useAuth";
+import Header from "./components/Header";
+import Navbar from "./components/Navbar";
+import TipModal from "./components/TipModal";
+import HomePage from "./pages/HomePage";
+import LineupPage from "./pages/LineupPage";
+import ArtistDetailPage from "./pages/ArtistDetailPage";
+import MyPage from "./pages/MyPage";
+import RecentTipsFeed from "./components/RecentTipsFeed";
+import { fetchArtistsList, fetchRecentTips } from "./firebase/services";
+
+function MainApp() {
+  const { currentUser, userProfile } = useAuth();
+  
+  const [activeTab, setActiveTab] = useState("home"); // home | lineup | feed | mypage | detail
+  const [artists, setArtists] = useState([]);
+  const [tips, setTips] = useState([]);
+  const [selectedArtistForTip, setSelectedArtistForTip] = useState(null);
+  const [selectedArtistDetail, setSelectedArtistDetail] = useState(null);
+
+  // データ初期取得
+  const loadData = async () => {
+    const fetchedArtists = await fetchArtistsList();
+    setArtists(fetchedArtists);
+    const fetchedTips = await fetchRecentTips();
+    setTips(fetchedTips);
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const handleOpenTipModal = (artist) => {
+    setSelectedArtistForTip(artist);
+  };
+
+  const handleSelectArtist = (artist) => {
+    setSelectedArtistDetail(artist);
+    setActiveTab("detail");
+  };
+
+  const handleTipSuccess = () => {
+    loadData();
+  };
+
+  // ログインユーザーのTip履歴
+  const userTips = currentUser 
+    ? tips.filter(t => t.fromUserId === currentUser.uid)
+    : [];
+
+  return (
+    <div className="min-h-screen bg-dark-bg text-gray-100 flex flex-col font-sans overflow-x-hidden max-w-full">
+      {/* Sticky Header */}
+      <Header activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      {/* Main Container */}
+      <main className="flex-1 max-w-md w-full mx-auto px-4 pt-4 pb-24 overflow-x-hidden">
+        {activeTab === "home" && (
+          <HomePage
+            artists={artists}
+            tips={tips}
+            onOpenTipModal={handleOpenTipModal}
+            onSelectArtist={handleSelectArtist}
+            setActiveTab={setActiveTab}
+          />
+        )}
+
+        {activeTab === "lineup" && (
+          <LineupPage
+            artists={artists}
+            onOpenTipModal={handleOpenTipModal}
+            onSelectArtist={handleSelectArtist}
+          />
+        )}
+
+        {activeTab === "feed" && (
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-xl font-extrabold text-white">LIVE TIP FEED</h2>
+              <p className="text-xs text-gray-400 font-mono">フロアから届いたリアルタイム応援メッセージ</p>
+            </div>
+            <RecentTipsFeed tips={tips} />
+          </div>
+        )}
+
+        {activeTab === "detail" && selectedArtistDetail && (
+          <ArtistDetailPage
+            artist={selectedArtistDetail}
+            allTips={tips}
+            onBack={() => setActiveTab("lineup")}
+            onOpenTipModal={handleOpenTipModal}
+          />
+        )}
+
+        {activeTab === "mypage" && (
+          <MyPage userTips={userTips} />
+        )}
+      </main>
+
+      {/* Tip Modal */}
+      {selectedArtistForTip && (
+        <TipModal
+          artist={selectedArtistForTip}
+          onClose={() => setSelectedArtistForTip(null)}
+          onSuccess={handleTipSuccess}
+        />
+      )}
+
+      {/* Mobile Fixed Bottom Navigation */}
+      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
+  );
+}
