@@ -2,6 +2,8 @@ import React from "react";
 import { Sparkles, Heart, Clock, ChevronRight, ExternalLink } from "lucide-react";
 
 export default function ArtistCard({ artist, onOpenTipModal, onSelectArtist }) {
+  const displayTime = artist.time === "時間未定" ? "TBA (未定)" : artist.time;
+
   return (
     <div className="glass-panel hover:border-neon-pink/50 transition-all duration-300 rounded-2xl overflow-hidden group border border-dark-border relative">
       {/* Background Subtle Gradient */}
@@ -21,7 +23,7 @@ export default function ArtistCard({ artist, onOpenTipModal, onSelectArtist }) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
           <span className="absolute bottom-1 left-1 text-[9px] font-mono font-bold text-neon-cyan flex items-center gap-0.5">
             <Clock className="w-2.5 h-2.5" />
-            {artist.time.split(" - ")[0]}
+            {displayTime}
           </span>
         </div>
 
@@ -35,7 +37,7 @@ export default function ArtistCard({ artist, onOpenTipModal, onSelectArtist }) {
               {artist.name}
             </h3>
             <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-neon-purple/20 text-neon-purple border border-neon-purple/30 font-bold shrink-0">
-              {artist.time}
+              {displayTime}
             </span>
           </div>
 

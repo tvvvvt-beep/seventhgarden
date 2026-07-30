@@ -5,7 +5,6 @@ import { Clock, Disc, Sparkles } from "lucide-react";
 export default function LineupPage({ artists, onOpenTipModal, onSelectArtist }) {
   const [searchQuery, setSearchQuery] = useState("");
 
-  // 検索フィルターのみ
   const filteredArtists = artists.filter((artist) => {
     const matchesSearch =
       artist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -19,10 +18,10 @@ export default function LineupPage({ artists, onOpenTipModal, onSelectArtist }) 
       <div>
         <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
           <Disc className="w-5 h-5 text-neon-pink animate-[spin_12s_linear_infinite]" />
-          <span>LINEUP & TIMETABLE</span>
+          <span>LINEUP & ARTISTS</span>
         </h2>
         <p className="text-xs text-gray-400 font-mono">
-          出演アーティスト・タイムテーブル（18:00 - 24:00）
+          出演アーティスト一覧（※出演順・タイムテーブルは順次発表）
         </p>
       </div>
 
@@ -49,7 +48,7 @@ export default function LineupPage({ artists, onOpenTipModal, onSelectArtist }) 
       <div className="flex items-center justify-between text-xs font-mono text-gray-400 border-b border-dark-border pb-2">
         <span className="flex items-center gap-1.5 text-neon-cyan font-bold">
           <Clock className="w-3.5 h-3.5" />
-          <span>TIME TABLE</span>
+          <span>TIMETABLE: TBA (順次発表)</span>
         </span>
         <span>{filteredArtists.length} ACTS</span>
       </div>
