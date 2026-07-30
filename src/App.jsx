@@ -17,10 +17,11 @@ function MainApp() {
   const [activeTab, setActiveTab] = useState("home"); // home | lineup | feed | mypage | detail
   const [artists, setArtists] = useState([]);
   const [tips, setTips] = useState([]);
-  const [selectedArtistForTip, setSelectedArtistForTip] = useState(null);
+  
+  // モーダル管理: { artist: object | null, mode: 'point' | 'paypay' }
+  const [tipModalConfig, setTipModalConfig] = useState(null);
   const [selectedArtistDetail, setSelectedArtistDetail] = useState(null);
 
-  // データ初期取得
   const loadData = async () => {
     const fetchedArtists = await fetchArtistsList();
     setArtists(fetchedArtists);
@@ -32,8 +33,8 @@ function MainApp() {
     loadData();
   }, []);
 
-  const handleOpenTipModal = (artist) => {
-    setSelectedArtistForTip(artist);
+  const handleOpenTipModal = (artist = null, mode = "point") => {
+    setTipModalConfig({ artist, mode });
   };
 
   const handleSelectArtist = (artist) => {
@@ -45,7 +46,6 @@ function MainApp() {
     loadData();
   };
 
-  // ログインユーザーのTip履歴
   const userTips = currentUser 
     ? tips.filter(t => t.fromUserId === currentUser.uid)
     : [];
@@ -100,10 +100,11 @@ function MainApp() {
       </main>
 
       {/* Tip Modal */}
-      {selectedArtistForTip && (
+      {tipModalConfig && (
         <TipModal
-          artist={selectedArtistForTip}
-          onClose={() => setSelectedArtistForTip(null)}
+          artist={tipModalConfig.artist}
+          initialMode={tipModalConfig.mode}
+          onClose={() => setTipModalConfig(null)}
           onSuccess={handleTipSuccess}
         />
       )}

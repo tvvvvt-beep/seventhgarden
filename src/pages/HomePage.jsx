@@ -86,31 +86,31 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
         </div>
       </div>
 
-      {/* Main Event Support PayPay Card */}
-      <div className="bg-gradient-to-r from-red-950/60 via-dark-card to-pink-950/60 border border-red-500/50 p-4 rounded-3xl flex items-center justify-between gap-3 shadow-2xl">
+      {/* Single One-Click Event Support PayPay Banner */}
+      <div className="bg-gradient-to-r from-red-950/70 via-dark-card to-pink-950/70 border border-red-500/60 p-4 rounded-3xl flex items-center justify-between gap-3 shadow-2xl">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-red-500 to-pink-600 flex items-center justify-center text-white shadow-lg shrink-0">
-            <Heart className="w-6 h-6 fill-white" />
+            <Heart className="w-6 h-6 fill-white text-white animate-pulse" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-extrabold text-white">7TH GARDEN 投げ銭のお願い</span>
+              <span className="text-xs font-extrabold text-white">イベント投げ銭（PayPay）</span>
               <span className="px-2 py-0.5 bg-red-500/20 text-red-400 text-[9px] font-mono font-bold rounded-full border border-red-500/40">
-                PayPay対応
+                金額自由
               </span>
             </div>
             <p className="text-[11px] text-gray-300 mt-0.5 leading-snug">
-              本日のイベント全体・空間への応援をPayPayで受け付けています。（※各DJへの個別の応援も可能です）
+              7TH GARDEN イベント全体への応援・ドネーションをPayPayで受け付けています。
             </p>
           </div>
         </div>
 
         <button
-          onClick={() => onOpenTipModal({ id: "event_main", name: "7TH GARDEN イベント全体", image: heroImageUrl })}
-          className="bg-gradient-to-r from-red-500 to-pink-600 hover:opacity-90 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-md shrink-0 transition-all font-mono flex items-center gap-1"
+          onClick={() => onOpenTipModal(null, "paypay")}
+          className="bg-gradient-to-r from-red-500 to-pink-600 hover:opacity-90 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-lg shrink-0 transition-all font-mono flex items-center gap-1.5 active:scale-95"
         >
           <QrCode className="w-4 h-4" />
-          <span>投げ銭QR</span>
+          <span>PayPay QR</span>
         </button>
       </div>
 
@@ -135,7 +135,7 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
             <ArtistCard
               key={artist.id}
               artist={artist}
-              onOpenTipModal={onOpenTipModal}
+              onOpenTipModal={(a) => onOpenTipModal(a, "point")}
               onSelectArtist={onSelectArtist}
             />
           ))}
