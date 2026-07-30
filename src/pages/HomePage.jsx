@@ -86,30 +86,31 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
         </div>
       </div>
 
-      {/* PayPay Support Banner Card */}
-      <div className="bg-gradient-to-r from-red-950/40 via-dark-card to-pink-950/40 border border-red-500/40 p-4 rounded-3xl flex items-center justify-between gap-3 shadow-xl">
+      {/* Main Event Support PayPay Card */}
+      <div className="bg-gradient-to-r from-red-950/60 via-dark-card to-pink-950/60 border border-red-500/50 p-4 rounded-3xl flex items-center justify-between gap-3 shadow-2xl">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-red-500 to-pink-600 flex items-center justify-center text-white shadow-lg shrink-0">
-            <QrCode className="w-6 h-6" />
+            <Heart className="w-6 h-6 fill-white" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-xs font-extrabold text-white">PayPay 投げ銭対応</span>
-              <span className="px-2 py-0.5 bg-red-500/20 text-red-400 text-[9px] font-mono font-bold rounded-full border border-red-500/30">
-                金額自由
+              <span className="text-xs font-extrabold text-white">7TH GARDEN 投げ銭のお願い</span>
+              <span className="px-2 py-0.5 bg-red-500/20 text-red-400 text-[9px] font-mono font-bold rounded-full border border-red-500/40">
+                PayPay対応
               </span>
             </div>
             <p className="text-[11px] text-gray-300 mt-0.5 leading-snug">
-              本日の出演者・DJへPayPayで直接応援チップを送れます。
+              本日のイベント全体・空間への応援をPayPayで受け付けています。（※各DJへの個別の応援も可能です）
             </p>
           </div>
         </div>
 
         <button
-          onClick={() => onOpenTipModal(artists[0] || { id: "artist_1", name: "出演アーティスト", image: heroImageUrl })}
-          className="bg-red-500 hover:bg-red-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-md shrink-0 transition-all font-mono"
+          onClick={() => onOpenTipModal({ id: "event_main", name: "7TH GARDEN イベント全体", image: heroImageUrl })}
+          className="bg-gradient-to-r from-red-500 to-pink-600 hover:opacity-90 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-md shrink-0 transition-all font-mono flex items-center gap-1"
         >
-          QRコード表示
+          <QrCode className="w-4 h-4" />
+          <span>投げ銭QR</span>
         </button>
       </div>
 
