@@ -1,58 +1,75 @@
 import React, { useState } from "react";
 import ArtistCard from "../components/ArtistCard";
-import { Users, Filter, Clock } from "lucide-react";
+import { Clock, Disc, Sparkles } from "lucide-react";
 
 export default function LineupPage({ artists, onOpenTipModal, onSelectArtist }) {
-  const [selectedStage, setSelectedStage] = useState("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const stages = ["ALL", ...Array.from(new Set(artists.map(a => a.stage)))];
-
-  const filteredArtists = selectedStage === "ALL"
-    ? artists
-    : artists.filter(a => a.stage === selectedStage);
+  // 検索フィルターのみ
+  const filteredArtists = artists.filter((artist) => {
+    const matchesSearch =
+      artist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      artist.genre.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
+  });
 
   return (
     <div className="space-y-5 pb-6 animate-fadeIn">
       {/* Title */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
-            <Users className="w-5 h-5 text-neon-pink" />
-            <span>LINEUP & TIMETABLE</span>
-          </h2>
-          <p className="text-xs text-gray-400 font-mono">
-            全{artists.length}組の出演アーティスト・特別パフォーマンス
-          </p>
-        </div>
+      <div>
+        <h2 className="text-xl font-extrabold text-white flex items-center gap-2">
+          <Disc className="w-5 h-5 text-neon-pink animate-[spin_12s_linear_infinite]" />
+          <span>LINEUP & TIMETABLE</span>
+        </h2>
+        <p className="text-xs text-gray-400 font-mono">
+          出演アーティスト・タイムテーブル（18:00 - 24:00）
+        </p>
       </div>
 
-      {/* Stage Filter Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        {stages.map((stage) => (
+      {/* Search Input */}
+      <div className="relative">
+        <input
+          type="text"
+          placeholder="アーティスト名・ジャンルで検索..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full bg-dark-surface border border-dark-border focus:border-neon-pink/60 rounded-xl px-4 py-2.5 text-xs text-white placeholder-gray-500 outline-none transition-all font-mono"
+        />
+        {searchQuery && (
           <button
-            key={stage}
-            onClick={() => setSelectedStage(stage)}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-mono font-bold whitespace-nowrap transition-all border ${
-              selectedStage === stage
-                ? "bg-neon-pink/20 border-neon-pink text-neon-pink shadow-neon-pink"
-                : "bg-dark-surface border-dark-border text-gray-400 hover:text-white"
-            }`}
+            onClick={() => setSearchQuery("")}
+            className="absolute right-3 top-2.5 text-xs text-gray-400 hover:text-white"
           >
-            {stage}
+            ✕
           </button>
-        ))}
+        )}
       </div>
 
-      {/* Artist Grid List */}
+      {/* Artists Count & Status */}
+      <div className="flex items-center justify-between text-xs font-mono text-gray-400 border-b border-dark-border pb-2">
+        <span className="flex items-center gap-1.5 text-neon-cyan font-bold">
+          <Clock className="w-3.5 h-3.5" />
+          <span>TIME TABLE</span>
+        </span>
+        <span>{filteredArtists.length} ACTS</span>
+      </div>
+
+      {/* Artist Cards List */}
       <div className="space-y-4">
-        {filteredArtists.map((artist) => (
-          <ArtistCard
-            key={artist.id}
-            artist={artist}
-            onOpenTipModal={onOpenTipModal}
-            onSelectArtist={onSelectArtist}
-          />
-        ))}
+        {filteredArtists.length === 0 ? (
+          <div className="text-center py-10 glass-panel rounded-2xl">
+            <p className="text-xs text-gray-400">該当するアーティストが見つかりませんでした。</p>
+          </div>
+        ) : (
+          filteredArtists.map((artist) => (
+            <ArtistCard
+              key={artist.id}
+              artist={artist}
+              onOpenTipModal={onOpenTipModal}
+              onSelectArtist={onSelectArtist}
+            />
+          ))
+        )}
       </div>
     </div>
   );
