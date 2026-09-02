@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
-import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
+import { signInWithPopup, signInWithRedirect, signOut, onAuthStateChanged } from "firebase/auth";
 import { auth, googleProvider, isConfigured } from "../firebase/config";
 import { getOrCreateUserProfile } from "../firebase/services";
 
@@ -37,12 +37,23 @@ export function AuthProvider({ children }) {
   }, []);
 
   // Google ログイン
+  // iOS Safari はポップアップOAuthが完了しないため、
+  // 移動型(iOS/Android)はリダイレクト方式、デスクトップはポップアップ方式を使う。
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(
+    (typeof navigator !== "undefined" && navigator.userAgent) || ""
+  );
+
   const signInWithGoogle = async () => {
     if (!isConfigured || !auth || !googleProvider) {
       // Demo Mode Fallback Login
       return demoLogin();
     }
     try {
+      if (isMobile) {
+        // リダイレクト方式: 戻り値なし。onAuthStateChanged が復帰時に呼ばれる。
+        await signInWithRedirect(auth, googleProvider);
+        return null;
+      }
       setLoading(true);
       const result = await signInWithPopup(auth, googleProvider);
       const profile = await getOrCreateUserProfile(result.user);
@@ -52,6 +63,7 @@ export function AuthProvider({ children }) {
       console.error("Google sign-in error:", error);
       throw error;
     } finally {
+      if (isMobile) return; // redirect はページ遷移するため finally で reset しない
       setLoading(false);
     }
   };
