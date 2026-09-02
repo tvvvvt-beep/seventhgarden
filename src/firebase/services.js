@@ -163,7 +163,6 @@ export async function sendTipTransaction({ userId, userProfile, artistId, amount
  * アーティスト一覧の取得（常に最新の `INITIAL_ARTISTS` を優先）
  */
 export async function fetchArtistsList() {
-  // 古いキャッシュをリセット
   localStorage.setItem("party_artists", JSON.stringify(INITIAL_ARTISTS));
 
   if (!isConfigured || !db) {
@@ -172,25 +171,25 @@ export async function fetchArtistsList() {
 
   try {
     const querySnapshot = await getDocs(collection(db, "artists"));
-    if (querySnapshot.empty) {
-      for (const artist of INITIAL_ARTISTS) {
-        await setDoc(doc(db, "artists", artist.id), artist);
-      }
-      return INITIAL_ARTISTS;
-    }
-
-    const artists = [];
+    const pointsMap = {};
     querySnapshot.forEach((docSnap) => {
       const data = docSnap.data();
-      // 時間が古い場合のフォールバック（最新の INITIAL_ARTISTS の time を適用）
-      const matchingInitial = INITIAL_ARTISTS.find(a => a.id === docSnap.id);
-      artists.push({
-        id: docSnap.id,
-        ...data,
-        time: matchingInitial ? matchingInitial.time : (data.time || "時間未定")
-      });
+      pointsMap[docSnap.id] = {
+        totalPoints: data.totalPoints,
+        likesCount: data.likesCount
+      };
     });
-    return artists.length > 0 ? artists : INITIAL_ARTISTS;
+
+    const mergedArtists = INITIAL_ARTISTS.map(artist => {
+      const liveData = pointsMap[artist.id];
+      return {
+        ...artist,
+        totalPoints: liveData?.totalPoints ?? artist.totalPoints,
+        likesCount: liveData?.likesCount ?? artist.likesCount
+      };
+    });
+
+    return mergedArtists;
   } catch (error) {
     console.error("Error fetching artists from Firestore:", error);
     return INITIAL_ARTISTS;

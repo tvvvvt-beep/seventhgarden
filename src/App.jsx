@@ -15,6 +15,7 @@ function MainApp() {
   const { currentUser, userProfile } = useAuth();
   
   const [activeTab, setActiveTab] = useState("home"); // home | lineup | feed | mypage | detail
+  const [activeEventTab, setActiveEventTab] = useState("vol_3"); // vol_3 | vol_2
   const [artists, setArtists] = useState([]);
   const [tips, setTips] = useState([]);
   
@@ -64,6 +65,7 @@ function MainApp() {
             onOpenTipModal={handleOpenTipModal}
             onSelectArtist={handleSelectArtist}
             setActiveTab={setActiveTab}
+            setActiveEventTab={setActiveEventTab}
           />
         )}
 
@@ -72,6 +74,8 @@ function MainApp() {
             artists={artists}
             onOpenTipModal={handleOpenTipModal}
             onSelectArtist={handleSelectArtist}
+            activeEventTab={activeEventTab}
+            setActiveEventTab={setActiveEventTab}
           />
         )}
 

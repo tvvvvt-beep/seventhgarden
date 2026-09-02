@@ -36,14 +36,21 @@ export default function ArtistCard({ artist, onOpenTipModal, onSelectArtist }) {
             >
               {artist.name}
             </h3>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-neon-purple/20 text-neon-purple border border-neon-purple/30 font-bold shrink-0">
-              {displayTime}
-            </span>
+            {artist.roleLabel && (
+              <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-neon-pink/20 text-neon-pink border border-neon-pink/40 font-bold shrink-0">
+                {artist.roleLabel}
+              </span>
+            )}
           </div>
 
-          <p className="text-[11px] text-neon-cyan font-mono truncate mb-2 font-medium">
-            {artist.genre}
-          </p>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-neon-purple/20 text-neon-cyan border border-neon-purple/30 font-bold shrink-0">
+              {displayTime} {artist.duration && artist.duration !== "ALL NIGHT" ? `(${artist.duration})` : ""}
+            </span>
+            <p className="text-[11px] text-gray-300 font-mono truncate font-medium">
+              {artist.genre}
+            </p>
+          </div>
 
           <p className="text-xs text-gray-300 line-clamp-2 leading-relaxed mb-3">
             {artist.bio}

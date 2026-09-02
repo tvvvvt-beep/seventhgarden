@@ -1,10 +1,10 @@
 import React from "react";
-import { EVENT_INFO } from "../firebase/mockData";
-import { Calendar, MapPin, Clock, Ticket, Sparkles, ChevronRight, QrCode, Heart } from "lucide-react";
+import { EVENT_INFO, PAST_EVENTS } from "../firebase/mockData";
+import { Calendar, MapPin, Clock, Ticket, Sparkles, ChevronRight, QrCode, Heart, History } from "lucide-react";
 import ArtistCard from "../components/ArtistCard";
 import RecentTipsFeed from "../components/RecentTipsFeed";
 
-export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist, setActiveTab }) {
+export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist, setActiveTab, setActiveEventTab }) {
   const heroImageUrl = "/hero-banner.jpg";
 
   return (
@@ -131,15 +131,64 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
         </div>
 
         <div className="space-y-4">
-          {artists.slice(0, 2).map((artist) => (
-            <ArtistCard
-              key={artist.id}
-              artist={artist}
-              onOpenTipModal={(a) => onOpenTipModal(a, "point")}
-              onSelectArtist={onSelectArtist}
-            />
-          ))}
+          {(() => {
+            const yamanaka = artists.find((a) => a.id === "artist_yamanaka" || a.name.toLowerCase().includes("yamanaka"));
+            const sen11 = artists.find((a) => a.id === "artist_sen11" || (a.name.includes("Sen 11") && !a.name.includes("Jerry")));
+            const displayList = [yamanaka, sen11].filter(Boolean);
+            const finalList = displayList.length > 0 ? displayList : artists.slice(0, 2);
+
+            return finalList.map((artist) => (
+              <ArtistCard
+                key={artist.id}
+                artist={artist}
+                onOpenTipModal={(a) => onOpenTipModal(a, "point")}
+                onSelectArtist={onSelectArtist}
+              />
+            ));
+          })()}
         </div>
+      </div>
+
+      {/* Past Events Archive Section */}
+      <div className="bg-dark-card/60 border border-purple-900/50 p-4 rounded-3xl space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <History className="w-4 h-4 text-neon-purple" />
+            <h3 className="text-xs font-extrabold text-white font-mono tracking-wider">PAST EVENTS ARCHIVE</h3>
+          </div>
+          <span className="text-[10px] font-mono text-purple-400 bg-purple-500/10 border border-purple-500/30 px-2 py-0.5 rounded-full">
+            過去の開催回
+          </span>
+        </div>
+
+        {PAST_EVENTS.map((event) => (
+          <div
+            key={event.id}
+            onClick={() => {
+              if (setActiveEventTab) setActiveEventTab(event.id);
+              setActiveTab("lineup");
+            }}
+            className="p-3 bg-dark-bg/80 border border-dark-border hover:border-purple-500/50 rounded-2xl cursor-pointer transition-all flex items-center justify-between group"
+          >
+            <div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300">
+                  {event.vol}
+                </span>
+                <span className="text-xs font-bold text-gray-200 group-hover:text-neon-pink transition-colors">
+                  {event.title}
+                </span>
+              </div>
+              <p className="text-[10px] font-mono text-gray-400">
+                {event.date} @ {event.venue} (10 ACTS)
+              </p>
+            </div>
+            <div className="flex items-center gap-1 text-[11px] font-mono text-neon-purple font-bold">
+              <span>出演者を見る</span>
+              <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Recent Tip Feed */}

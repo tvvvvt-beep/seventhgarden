@@ -30,14 +30,19 @@ export default function ArtistDetailPage({ artist, allTips, onBack, onOpenTipMod
           <div className="absolute inset-0 bg-gradient-to-t from-dark-card via-dark-card/50 to-transparent" />
           
           {/* Stage & Time Badges */}
-          <div className="absolute top-4 left-4 flex items-center gap-2">
+          <div className="absolute top-4 left-4 flex flex-wrap items-center gap-1.5">
+            {artist.roleLabel && (
+              <span className="bg-neon-pink/90 backdrop-blur-md text-white text-[10px] font-mono font-bold px-2.5 py-1 rounded-full shadow-neon-pink">
+                {artist.roleLabel}
+              </span>
+            )}
             <span className="bg-dark-bg/80 backdrop-blur-md border border-neon-cyan/50 text-neon-cyan text-[10px] font-mono font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
               <MapPin className="w-3 h-3" />
               {artist.stage}
             </span>
             <span className="bg-dark-bg/80 backdrop-blur-md text-gray-200 text-[10px] font-mono px-2.5 py-1 rounded-full flex items-center gap-1 border border-white/10">
               <Clock className="w-3 h-3 text-neon-pink" />
-              {artist.time}
+              {artist.time} {artist.duration && artist.duration !== "ALL NIGHT" ? `(${artist.duration})` : ""}
             </span>
           </div>
         </div>
