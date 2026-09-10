@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react";
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./context/useAuth";
 import Header from "./components/Header";
+import InAppBrowserBanner from "./components/InAppBrowserBanner";
 import Navbar from "./components/Navbar";
 import TipModal from "./components/TipModal";
 import HomePage from "./pages/HomePage";
 import LineupPage from "./pages/LineupPage";
 import ArtistDetailPage from "./pages/ArtistDetailPage";
 import MyPage from "./pages/MyPage";
+import BackOffice from "./pages/BackOffice";
 import RecentTipsFeed from "./components/RecentTipsFeed";
 import { fetchArtistsList, fetchRecentTips } from "./firebase/services";
 
@@ -56,6 +58,9 @@ function MainApp() {
       {/* Sticky Header */}
       <Header activeTab={activeTab} setActiveTab={setActiveTab} />
 
+      {/* In-App Browser Warning Banner (LINE, Instagram etc) */}
+      <InAppBrowserBanner />
+
       {/* Main Container */}
       <main className="flex-1 max-w-md w-full mx-auto px-4 pt-4 pb-24 overflow-x-hidden">
         {activeTab === "home" && (
@@ -100,6 +105,12 @@ function MainApp() {
 
         {activeTab === "mypage" && (
           <MyPage userTips={userTips} />
+        )}
+
+        {activeTab === "backoffice" && (
+          <BackOffice
+            onEventUpdated={() => loadData()}
+          />
         )}
       </main>
 

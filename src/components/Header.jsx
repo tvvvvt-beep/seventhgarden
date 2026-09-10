@@ -46,11 +46,11 @@ export default function Header({ activeTab, setActiveTab }) {
             </button>
           ) : (
             <button
-              onClick={signInWithGoogle}
+              onClick={() => setActiveTab("mypage")}
               className="flex items-center gap-1.5 bg-gradient-to-r from-neon-pink to-neon-purple hover:opacity-90 text-white font-bold text-xs px-3 py-1.5 rounded-full shadow-neon-pink transition-all"
             >
               <LogIn className="w-3.5 h-3.5" />
-              <span>ログイン</span>
+              <span>ログイン / 参加</span>
             </button>
           )}
         </div>

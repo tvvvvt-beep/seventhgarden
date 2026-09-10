@@ -2,9 +2,22 @@ import { initializeApp, getApps } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
+// 本番ホスティング環境（Vercel等）では同一ドメインのリバースプロキシを経由してiOS SafariのITP制限を回避
+const resolveAuthDomain = () => {
+  if (
+    typeof window !== "undefined" &&
+    window.location.hostname &&
+    !window.location.hostname.includes("localhost") &&
+    !window.location.hostname.includes("127.0.0.1")
+  ) {
+    return window.location.hostname;
+  }
+  return import.meta.env.VITE_FIREBASE_AUTH_DOMAIN;
+};
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  authDomain: resolveAuthDomain(),
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,

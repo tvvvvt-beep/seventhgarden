@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, Users, MessageSquareHeart, UserCheck } from "lucide-react";
+import { Home, Users, MessageSquareHeart, UserCheck, Lock } from "lucide-react";
 
 export default function Navbar({ activeTab, setActiveTab }) {
   const navItems = [
@@ -7,6 +7,7 @@ export default function Navbar({ activeTab, setActiveTab }) {
     { id: "lineup", label: "出演者", icon: Users },
     { id: "feed", label: "Tipライブ", icon: MessageSquareHeart },
     { id: "mypage", label: "マイページ", icon: UserCheck },
+    { id: "backoffice", label: "バックオフィス", icon: Lock },
   ];
 
   return (

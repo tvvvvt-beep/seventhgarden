@@ -31,7 +31,9 @@ export async function getOrCreateUserProfile(user) {
     createdAt: new Date().toISOString()
   };
 
-  if (!isConfigured || !db) {
+  const isGuest = user.uid.startsWith("guest_") || user.uid.startsWith("demo_user_");
+
+  if (!isConfigured || !db || isGuest) {
     const localUserJson = localStorage.getItem(`user_${user.uid}`);
     if (localUserJson) {
       return JSON.parse(localUserJson);
@@ -67,7 +69,9 @@ export async function sendTipTransaction({ userId, userProfile, artistId, amount
     throw new Error("無効なリクエストパラメータです。");
   }
 
-  if (!isConfigured || !db) {
+  const isGuest = userId.startsWith("guest_") || userId.startsWith("demo_user_");
+
+  if (!isConfigured || !db || isGuest) {
     const currentPoints = userProfile.points || 0;
     if (currentPoints < amount) {
       throw new Error("ポイントが不足しています。保有ポイント: " + currentPoints + " pt");
@@ -92,6 +96,19 @@ export async function sendTipTransaction({ userId, userProfile, artistId, amount
 
     const localTips = JSON.parse(localStorage.getItem("party_tips") || "[]");
     localStorage.setItem("party_tips", JSON.stringify([newTip, ...localTips]));
+
+    // Firestoreが利用可能ならバックグラウンドでフィードに書き込み試行
+    if (isConfigured && db) {
+      try {
+        const tipRef = doc(collection(db, "tips"));
+        setDoc(tipRef, {
+          ...newTip,
+          timestamp: serverTimestamp()
+        }).catch(() => {});
+      } catch (e) {
+        // ignore background push error
+      }
+    }
 
     return { success: true, updatedUser, newTip };
   }
