@@ -3,6 +3,7 @@ import { EVENT_INFO, PAST_EVENTS } from "../firebase/mockData";
 import { Calendar, MapPin, Clock, Sparkles, ChevronRight, QrCode, Heart, History, Target, ArrowUpRight, Eye, Download, X } from "lucide-react";
 import ArtistCard from "../components/ArtistCard";
 import RecentTipsFeed from "../components/RecentTipsFeed";
+import DynamicHero3D from "../components/DynamicHero3D";
 
 export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist, setActiveTab, setActiveEventTab }) {
   const heroImageUrl = "/hero-banner.jpg";
@@ -11,37 +12,18 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
 
   return (
     <div className="space-y-6 pb-6 animate-fadeIn max-w-full overflow-hidden">
-      {/* Hero Event Flyer Card (Just-Fit Display) */}
-      <div className="relative rounded-3xl overflow-hidden glass-panel-glow border border-neon-pink/50 shadow-2xl w-full">
-        
-        {/* Title Flyer Image */}
-        <div 
-          onClick={() => setShowFlyerModal(true)}
-          className="relative w-full bg-black/60 flex items-center justify-center p-2 cursor-pointer group"
-        >
-          <img
-            src={heroImageUrl}
-            alt={EVENT_INFO.title}
-            className="w-full h-auto max-h-72 object-contain rounded-2xl shadow-lg border border-white/10 group-hover:scale-[1.01] transition-transform"
-          />
-          <div className="absolute top-4 left-4 z-10 flex gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-dark-bg/80 backdrop-blur-md border border-neon-pink/60 text-neon-pink font-mono text-[10px] font-bold tracking-widest rounded-full shadow-neon-pink">
-              <Sparkles className="w-3 h-3 text-neon-pink" />
-              OFFICIAL FLYER
-            </span>
-            <span className="inline-flex items-center gap-1 px-3 py-1 bg-neon-cyan/20 backdrop-blur-md border border-neon-cyan/60 text-neon-cyan font-mono text-[10px] font-extrabold tracking-widest rounded-full">
-              {EVENT_INFO.entranceFee}
-            </span>
-          </div>
+      {/* 3D Interactive Hero Canvas (Three.js) */}
+      <div className="w-full">
+        <DynamicHero3D
+          frontImage={heroImageUrl}
+          backImage={officialFlyerUrl}
+          onOpenModal={() => setShowFlyerModal(true)}
+          entranceFee={EVENT_INFO.entranceFee}
+        />
+      </div>
 
-          <div className="absolute bottom-4 right-4 z-10">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-black/70 backdrop-blur-md border border-white/30 text-white font-mono text-[10px] font-bold rounded-full group-hover:bg-neon-pink group-hover:border-neon-pink transition-all">
-              <Eye className="w-3 h-3" />
-              <span>公式ポスターを拡大</span>
-            </span>
-          </div>
-        </div>
-
+      {/* Hero Event Details Card */}
+      <div className="relative rounded-3xl overflow-hidden glass-panel border border-neon-pink/40 shadow-2xl w-full">
         {/* Content Details Below Flyer Image */}
         <div className="p-5 text-center">
           <h2 className="text-2xl font-black tracking-wider text-white bg-gradient-to-r from-white via-pink-200 to-neon-pink bg-clip-text text-transparent mb-1">
