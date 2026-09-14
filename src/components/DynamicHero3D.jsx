@@ -136,8 +136,9 @@ export default function DynamicHero3D({
     scene.add(mainGroup);
 
     // --- (A) 中央の写真アートワークメッシュ (枠線なし・純粋な写真) ---
-    const photoWidth = 2.2;
-    const photoHeight = 3.58;
+    // 縦横比率厳守 (468:762 = 0.61417) かつ上下の余白を確保するためコンパクトに調整
+    const photoHeight = 3.0;
+    const photoWidth = photoHeight * 0.61417; // 約 1.84
     const photoGeom = new THREE.PlaneGeometry(photoWidth, photoHeight);
     const photoMat = new THREE.MeshPhysicalMaterial({
       map: photoTex,
@@ -150,11 +151,11 @@ export default function DynamicHero3D({
       side: THREE.FrontSide, // 正面・反転なし
     });
     const photoMesh = new THREE.Mesh(photoGeom, photoMat);
-    photoMesh.position.set(0, 0.05, 0.1);
+    photoMesh.position.set(0, 0.0, 0.1);
     mainGroup.add(photoMesh);
 
     // --- (B) 奥のシネマティックワイドバナー (枠線なし) ---
-    const bannerGeom = new THREE.PlaneGeometry(4.8, 2.035);
+    const bannerGeom = new THREE.PlaneGeometry(4.4, 1.865);
     const bannerMat = new THREE.MeshPhysicalMaterial({
       map: bannerTex,
       transparent: true,
@@ -164,25 +165,25 @@ export default function DynamicHero3D({
       side: THREE.FrontSide,
     });
     const bannerMesh = new THREE.Mesh(bannerGeom, bannerMat);
-    bannerMesh.position.set(0, 0.3, -1.5);
+    bannerMesh.position.set(0, 0.2, -1.5);
     mainGroup.add(bannerMesh);
 
-    // --- (C) 写真以外の全フライヤー要素（堂々たるスタック配置・重なっても全部読める） ---
-    // フライヤー原本に記載されている全情報を完全に網羅
+    // --- (C) 写真以外の全フライヤー要素（縦をギュッと詰めて上下の切れを解消） ---
+    // 上下の安全マージンを確保し、中央に美しくスタック配置
     const textItems = [
-      { text: "7th GARDEN", color: "#ffffff", size: 54, height: 0.44, pos: [0, 1.82, 0.65] },
-      { text: "09/17 (THU)", color: "#f8fafc", size: 44, height: 0.36, pos: [0, 1.42, 0.62] },
-      { text: "Compufunk Records & BAR", color: "#ffffff", size: 44, height: 0.36, pos: [0, 1.02, 0.6] },
-      { text: "18:00~24:00 Charge Free", color: "#e2e8f0", size: 40, height: 0.32, pos: [0, 0.64, 0.58] },
-      { text: "DJ: toru yamanaka (Dumb Type)", color: "#ffffff", size: 36, height: 0.29, pos: [0, 0.28, 0.56] },
-      { text: "Dune (U.V.)  /  tvvt", color: "#f1f5f9", size: 36, height: 0.29, pos: [0, -0.06, 0.55] },
-      { text: "KASSIS. (MOKSA.)  /  youngANDoldNEVERdie", color: "#f8fafc", size: 34, height: 0.28, pos: [0, -0.40, 0.54] },
-      { text: "Selector: Sen 11", color: "#e2e8f0", size: 34, height: 0.28, pos: [-0.62, -0.74, 0.52] },
-      { text: "CRYSTAL BOWL: tamako", color: "#f1f5f9", size: 34, height: 0.28, pos: [0.62, -0.74, 0.52] },
-      { text: "Live P.A.: Sen & Jerry", color: "#f8fafc", size: 34, height: 0.28, pos: [0, -1.06, 0.52] },
-      { text: "LIVE PAINT + VISUALS : FisH + HIWATASHI", color: "#ffffff", size: 34, height: 0.28, pos: [0, -1.40, 0.52] },
-      { text: "PLACE FOR ART AND MUSIC", color: "#cbd5e1", size: 32, height: 0.26, pos: [-0.60, -1.74, 0.5] },
-      { text: "\"PayPay tipping method\"", color: "#e2e8f0", size: 32, height: 0.26, pos: [0.60, -1.74, 0.5] },
+      { text: "7th GARDEN", color: "#ffffff", size: 48, height: 0.36, pos: [0, 1.18, 0.65] },
+      { text: "09/17 (THU)", color: "#f8fafc", size: 38, height: 0.28, pos: [0, 0.90, 0.62] },
+      { text: "Compufunk Records & BAR", color: "#ffffff", size: 38, height: 0.28, pos: [0, 0.64, 0.60] },
+      { text: "18:00~24:00 Charge Free", color: "#e2e8f0", size: 34, height: 0.25, pos: [0, 0.39, 0.58] },
+      { text: "DJ: toru yamanaka (Dumb Type)", color: "#ffffff", size: 32, height: 0.24, pos: [0, 0.15, 0.56] },
+      { text: "Dune (U.V.)  /  tvvt", color: "#f1f5f9", size: 32, height: 0.24, pos: [0, -0.08, 0.55] },
+      { text: "KASSIS. (MOKSA.)  /  youngANDoldNEVERdie", color: "#f8fafc", size: 30, height: 0.23, pos: [0, -0.31, 0.54] },
+      { text: "Selector: Sen 11", color: "#e2e8f0", size: 30, height: 0.23, pos: [-0.58, -0.54, 0.52] },
+      { text: "CRYSTAL BOWL: tamako", color: "#f1f5f9", size: 30, height: 0.23, pos: [0.58, -0.54, 0.52] },
+      { text: "Live P.A.: Sen & Jerry", color: "#f8fafc", size: 30, height: 0.23, pos: [0, -0.77, 0.52] },
+      { text: "LIVE PAINT + VISUALS : FisH + HIWATASHI", color: "#ffffff", size: 30, height: 0.23, pos: [0, -1.00, 0.52] },
+      { text: "PLACE FOR ART AND MUSIC", color: "#cbd5e1", size: 28, height: 0.22, pos: [-0.55, -1.23, 0.5] },
+      { text: "\"PayPay tipping method\"", color: "#e2e8f0", size: 28, height: 0.22, pos: [0.55, -1.23, 0.5] },
     ];
 
     const textMeshes = [];
@@ -325,13 +326,13 @@ export default function DynamicHero3D({
         }
         const chaos = chaosProgress.current;
 
-        // 1. カメラワーク（緩やかな動画的ズーム＆パン ＋ スマホ・PC自動フィッティング）
+        // 1. カメラワーク（緩やかな動画的ズーム＆パン ＋ 上下の余白を確保した自動フィッティング）
         const aspect = width / height;
-        // 横幅3.0のテキスト群がどの画面比率でも絶対に画面外に見切れないようにカメラ距離を算出
-        const fitZ = Math.max(5.8, 3.2 / (0.8284 * Math.max(aspect, 0.48)));
-        const camX = Math.sin(t * 0.3) * 0.15 + mousePos.current.x * 0.4;
-        const camY = Math.cos(t * 0.25) * 0.12 + mousePos.current.y * 0.4;
-        const camZ = fitZ + Math.sin(t * 0.2) * 0.2 - chaos * 0.4;
+        // 縦も横も絶対に画面外に見切れない安全なカメラ距離を算出
+        const fitZ = Math.max(5.4, 2.7 / (0.8284 * Math.max(aspect, 0.45)));
+        const camX = Math.sin(t * 0.3) * 0.12 + mousePos.current.x * 0.35;
+        const camY = Math.cos(t * 0.25) * 0.10 + mousePos.current.y * 0.35;
+        const camZ = fitZ + Math.sin(t * 0.2) * 0.15 - chaos * 0.35;
 
         camera.position.set(camX, camY, camZ);
         camera.lookAt(0, 0, 0);
@@ -507,13 +508,6 @@ export default function DynamicHero3D({
           <Maximize2 className="w-3.5 h-3.5" />
           <span>公式ポスター拡大</span>
         </button>
-      </div>
-
-      {/* Center Subtle Prompt */}
-      <div className="absolute bottom-11 left-1/2 -translate-x-1/2 z-0 pointer-events-none text-center opacity-70">
-        <span className="text-[9px] font-mono text-gray-400 bg-black/60 px-3 py-0.5 rounded-full border border-white/10">
-          画面クリックでテキストがぐるぐる回転して元に戻ります
-        </span>
       </div>
     </div>
   );
