@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/useAuth";
 import { sendTipTransaction } from "../firebase/services";
-import { Heart, CheckCircle2, AlertCircle, X, Send, Info, Copy, Check, Coins, PartyPopper } from "lucide-react";
+import { Heart, CheckCircle2, AlertCircle, X, Send, Info, Copy, Check, Coins, PartyPopper, Users } from "lucide-react";
 import confetti from "canvas-confetti";
 
-export default function TipModal({ artist, initialMode = "paypay", onClose, onSuccess }) {
+export default function TipModal({ artist, initialMode = "paypay", onClose, onSuccess, onNavigateToLineup }) {
   const { currentUser, userProfile, setUserProfile } = useAuth();
   
   // モード: アーティスト指定時は 'paypay'（直接実質支援）または 'point'（ゲーム内トークン）
@@ -224,6 +224,36 @@ export default function TipModal({ artist, initialMode = "paypay", onClose, onSu
                 <PartyPopper className="w-4 h-4 text-neon-yellow" />
                 <span>🎉 クラッカーを鳴らしてフロアを祝う！ (タップ)</span>
               </button>
+            </div>
+
+            {/* 各アーティスト個別への送金案内 */}
+            <div className="bg-gradient-to-br from-neon-purple/20 via-pink-500/15 to-neon-cyan/20 border border-neon-pink/40 p-3.5 rounded-2xl text-left space-y-2.5 shadow-lg">
+              <div className="flex items-start gap-2.5">
+                <span className="text-lg leading-none p-1 rounded-lg bg-neon-pink/20 border border-neon-pink/40 shrink-0">💡</span>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-xs font-black text-neon-yellow flex items-center gap-1">
+                    <span>各アーティスト（出演者）へ送金したい方へ</span>
+                  </h4>
+                  <p className="text-[11px] text-gray-200 mt-1 leading-relaxed">
+                    このQRコードは<span className="text-white font-bold">「イベント全体への支援」</span>です。
+                    DJ DUNE（レンズ購入支援）やKASSIS（福井・大阪拠点整備）など、<span className="text-neon-pink font-bold">それぞれのアーティストへ送金したい場合</span>は、
+                    <strong>「出演者一覧」</strong>やトップページの各カードにある
+                    <span className="inline-block px-1.5 py-0.5 mx-1 rounded bg-red-600 text-white font-mono text-[10px] font-bold shadow">PayPayで応援</span>
+                    ボタンを押してください。
+                  </p>
+                </div>
+              </div>
+
+              {onNavigateToLineup && (
+                <button
+                  type="button"
+                  onClick={onNavigateToLineup}
+                  className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-neon-pink/30 to-neon-purple/40 hover:from-neon-pink/50 hover:to-neon-purple/60 border border-neon-pink text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm"
+                >
+                  <Users className="w-3.5 h-3.5 text-neon-cyan" />
+                  <span>出演者一覧から推しを選んでPayPay応援する →</span>
+                </button>
+              )}
             </div>
 
             {/* Instructions Steps */}
