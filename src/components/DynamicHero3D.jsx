@@ -183,8 +183,7 @@ export default function DynamicHero3D({
       { text: "CRYSTAL BOWL: tamako", color: "#f1f5f9", size: 30, height: 0.23, pos: [0.58, -0.54, 0.52] },
       { text: "Live P.A.: Sen & Jerry", color: "#f8fafc", size: 30, height: 0.23, pos: [0, -0.77, 0.52] },
       { text: "LIVE PAINT + VISUALS : FisH + HIWATASHI", color: "#ffffff", size: 30, height: 0.23, pos: [0, -1.00, 0.52] },
-      { text: "PLACE FOR ART AND MUSIC", color: "#cbd5e1", size: 28, height: 0.22, pos: [-0.55, -1.23, 0.5] },
-      { text: "\"PayPay tipping method\"", color: "#e2e8f0", size: 28, height: 0.22, pos: [0.55, -1.23, 0.5] },
+      { text: "PLACE FOR ART AND MUSIC", color: "#cbd5e1", size: 30, height: 0.24, pos: [0, -1.23, 0.5] },
     ];
 
     const textMeshes = [];
