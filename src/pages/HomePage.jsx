@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { EVENT_INFO, PAST_EVENTS } from "../firebase/mockData";
-import { Calendar, MapPin, Clock, Sparkles, ChevronRight, QrCode, Heart, History, Target, ArrowUpRight } from "lucide-react";
+import { Calendar, MapPin, Clock, Sparkles, ChevronRight, QrCode, Heart, History, Target, ArrowUpRight, Eye, Download, X } from "lucide-react";
 import ArtistCard from "../components/ArtistCard";
 import RecentTipsFeed from "../components/RecentTipsFeed";
 
 export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist, setActiveTab, setActiveEventTab }) {
   const heroImageUrl = "/hero-banner.jpg";
+  const officialFlyerUrl = "/promo/7th_garden_0917_flyer.jpg";
+  const [showFlyerModal, setShowFlyerModal] = useState(false);
 
   return (
     <div className="space-y-6 pb-6 animate-fadeIn max-w-full overflow-hidden">
@@ -13,11 +15,14 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
       <div className="relative rounded-3xl overflow-hidden glass-panel-glow border border-neon-pink/50 shadow-2xl w-full">
         
         {/* Title Flyer Image */}
-        <div className="relative w-full bg-black/60 flex items-center justify-center p-2">
+        <div 
+          onClick={() => setShowFlyerModal(true)}
+          className="relative w-full bg-black/60 flex items-center justify-center p-2 cursor-pointer group"
+        >
           <img
             src={heroImageUrl}
             alt={EVENT_INFO.title}
-            className="w-full h-auto max-h-72 object-contain rounded-2xl shadow-lg border border-white/10"
+            className="w-full h-auto max-h-72 object-contain rounded-2xl shadow-lg border border-white/10 group-hover:scale-[1.01] transition-transform"
           />
           <div className="absolute top-4 left-4 z-10 flex gap-2">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-dark-bg/80 backdrop-blur-md border border-neon-pink/60 text-neon-pink font-mono text-[10px] font-bold tracking-widest rounded-full shadow-neon-pink">
@@ -26,6 +31,13 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
             </span>
             <span className="inline-flex items-center gap-1 px-3 py-1 bg-neon-cyan/20 backdrop-blur-md border border-neon-cyan/60 text-neon-cyan font-mono text-[10px] font-extrabold tracking-widest rounded-full">
               {EVENT_INFO.entranceFee}
+            </span>
+          </div>
+
+          <div className="absolute bottom-4 right-4 z-10">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-black/70 backdrop-blur-md border border-white/30 text-white font-mono text-[10px] font-bold rounded-full group-hover:bg-neon-pink group-hover:border-neon-pink transition-all">
+              <Eye className="w-3 h-3" />
+              <span>公式ポスターを拡大</span>
             </span>
           </div>
         </div>
@@ -310,6 +322,59 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
 
       {/* Recent Tip Feed */}
       <RecentTipsFeed tips={tips} />
+
+      {/* Official Flyer Fullscreen Modal */}
+      {showFlyerModal && (
+        <div 
+          onClick={() => setShowFlyerModal(false)}
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-3 cursor-zoom-out animate-fadeIn"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()} 
+            className="max-w-md w-full max-h-[95vh] flex flex-col glass-panel rounded-3xl overflow-hidden border border-neon-pink/50 shadow-2xl"
+          >
+            {/* Modal Header */}
+            <div className="p-3 bg-dark-surface/90 border-b border-dark-border flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-neon-pink animate-pulse" />
+                <span className="text-xs font-bold text-white font-mono">
+                  7th GARDEN 09/17 OFFICIAL POSTER
+                </span>
+              </div>
+              <button
+                onClick={() => setShowFlyerModal(false)}
+                className="p-1 rounded-xl bg-dark-card text-gray-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Flyer Image Container */}
+            <div className="flex-1 overflow-y-auto p-2 bg-black flex items-center justify-center">
+              <img
+                src={officialFlyerUrl}
+                alt="7th GARDEN 09/17 Official Flyer"
+                className="w-full h-auto max-h-[75vh] object-contain rounded-xl shadow-2xl"
+              />
+            </div>
+
+            {/* Modal Footer Actions */}
+            <div className="p-3 bg-dark-surface/90 border-t border-dark-border flex items-center justify-between gap-2">
+              <span className="text-[10px] font-mono text-gray-400">
+                Compufunk Records & BAR (OSAKA)
+              </span>
+              <a
+                href={officialFlyerUrl}
+                download="7th_GARDEN_0917_Flyer.jpg"
+                className="bg-gradient-to-r from-neon-pink to-neon-purple text-white font-extrabold text-xs py-2 px-4 rounded-xl flex items-center gap-1.5 shadow-neon-pink transition-all"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>ポスター画像を保存</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

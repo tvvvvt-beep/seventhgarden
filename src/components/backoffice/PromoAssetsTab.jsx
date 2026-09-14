@@ -11,6 +11,17 @@ export default function PromoAssetsTab() {
 
   const assets = [
     {
+      id: "official_flyer_0917",
+      category: "image",
+      title: "公式フライヤー 09/17（最新オフィシャルポスター）",
+      subtitle: "Compufunk Records & BAR 全出演者掲載ポスター",
+      path: "/promo/7th_garden_0917_flyer.jpg",
+      format: "JPG / 縦型ポスター",
+      tag: "最新公式ポスター",
+      tagColor: "neon-pink",
+      desc: "7th GARDEN 09/17の全出演アーティスト（山中透、Dune、tvvt、KASSIS、Sen 11、tamako、Sen & Jerry、FisH + HIWATASHI等）が網羅された最新オフィシャルフライヤー。"
+    },
+    {
       id: "flyer_hero",
       category: "image",
       title: "メインヒーローバナー",
