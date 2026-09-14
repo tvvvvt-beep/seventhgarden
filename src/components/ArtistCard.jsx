@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles, Heart, Clock, ChevronRight, ExternalLink } from "lucide-react";
+import { Sparkles, Heart, Clock, ChevronRight } from "lucide-react";
 
 export default function ArtistCard({ artist, onOpenTipModal, onSelectArtist }) {
   const displayTime = artist.time === "時間未定" ? "TBA (未定)" : artist.time;
@@ -52,9 +52,32 @@ export default function ArtistCard({ artist, onOpenTipModal, onSelectArtist }) {
             </p>
           </div>
 
-          <p className="text-xs text-gray-300 line-clamp-2 leading-relaxed mb-3">
+          <p className="text-xs text-gray-300 line-clamp-2 leading-relaxed mb-2.5">
             {artist.bio}
           </p>
+
+          {/* Self-Realization Goal Mini Preview */}
+          {artist.supportGoal && (
+            <div 
+              onClick={() => onSelectArtist(artist)}
+              className="mb-3 p-2 rounded-xl bg-red-950/25 border border-red-500/30 hover:border-red-500/60 cursor-pointer transition-all flex items-start gap-1.5 group/goal"
+            >
+              <span className="text-[11px] shrink-0 mt-0.5">🎯</span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[9px] font-mono font-bold text-red-400">自己実現ゴール</span>
+                  {artist.supportGoal.tag && (
+                    <span className="text-[8px] font-mono px-1 py-0.2 rounded bg-red-500/20 text-red-300">
+                      {artist.supportGoal.tag}
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] font-bold text-white truncate group-hover/goal:text-red-300 transition-colors">
+                  {artist.supportGoal.title}
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Points & Support Button Bar */}
           <div className="flex items-center justify-between pt-2 border-t border-dark-border/60">
@@ -74,11 +97,11 @@ export default function ArtistCard({ artist, onOpenTipModal, onSelectArtist }) {
               </button>
 
               <button
-                onClick={() => onOpenTipModal(artist)}
-                className="flex items-center gap-1 bg-gradient-to-r from-neon-pink to-neon-purple hover:opacity-90 text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow-neon-pink transition-all active:scale-95"
+                onClick={() => onOpenTipModal(artist, "paypay")}
+                className="flex items-center gap-1 bg-gradient-to-r from-red-500 via-pink-600 to-neon-purple hover:opacity-95 text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow-md transition-all active:scale-95"
               >
-                <Sparkles className="w-3.5 h-3.5 fill-white text-white" />
-                <span>Tipで応援</span>
+                <Heart className="w-3.5 h-3.5 fill-white text-white" />
+                <span>PayPay / 応援</span>
               </button>
             </div>
           </div>

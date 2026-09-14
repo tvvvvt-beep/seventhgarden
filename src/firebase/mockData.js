@@ -50,7 +50,14 @@ export const INITIAL_ARTISTS = [
     bio: "四半世紀にわたってアンビエントの現場「U.V.」を継続してきた第一人者。深遠なサウンドスケープと立体音響による空間実験を展開。",
     totalPoints: 11200,
     likesCount: 165,
-    sns: { instagram: "dune_uv_official" }
+    sns: { instagram: "dune_uv_official" },
+    supportGoal: {
+      title: "写真家として一歩進むための良いレンズが欲しい！",
+      description: "四半世紀のDJ活動に加え、写真家としても表現の幅を広げる新たな一歩を踏み出したいと考えています。次の作品作りに向けた高品質なカメラレンズ導入を目指してPayPay投げ銭を募集中！ぜひ応援をお願いします。",
+      tag: "PHOTO / LENS",
+      targetAmount: "¥50,000",
+      memoKeyword: "DUNE"
+    }
   },
   {
     id: "artist_sen_jerry",
@@ -106,7 +113,14 @@ export const INITIAL_ARTISTS = [
     bio: "MOKSA.名義でも活動する気鋭の女性DJ。ミニマルテクノと繊細な音響テクスチャーが織りなす上質なラウンジセット。",
     totalPoints: 8900,
     likesCount: 115,
-    sns: { instagram: "kassis_moksa" }
+    sns: { instagram: "kassis_moksa" },
+    supportGoal: {
+      title: "福井・大阪の二重拠点化に伴う制作・活動環境の整備！",
+      description: "福井と大阪の二重拠点での活動が本格スタート！2つの拠点を往来しながら良質な音楽を届け続けるため、移動・スタジオ制作環境の整備へのPayPay投げ銭サポートを大歓迎しています！",
+      tag: "DUAL BASE / STUDIO",
+      targetAmount: "¥30,000",
+      memoKeyword: "KASSIS"
+    }
   },
   {
     id: "artist_tvvt",

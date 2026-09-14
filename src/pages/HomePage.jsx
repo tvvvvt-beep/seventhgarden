@@ -1,6 +1,6 @@
 import React from "react";
 import { EVENT_INFO, PAST_EVENTS } from "../firebase/mockData";
-import { Calendar, MapPin, Clock, Ticket, Sparkles, ChevronRight, QrCode, Heart, History } from "lucide-react";
+import { Calendar, MapPin, Clock, Sparkles, ChevronRight, QrCode, Heart, History, Target, ArrowUpRight } from "lucide-react";
 import ArtistCard from "../components/ArtistCard";
 import RecentTipsFeed from "../components/RecentTipsFeed";
 
@@ -114,6 +114,120 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
         </button>
       </div>
 
+      {/* Self-Realization & PayPay Support PR Section */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-red-500 to-neon-pink flex items-center justify-center text-white shadow-md">
+              <Target className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-white tracking-wider flex items-center gap-1.5">
+                <span>ARTIST GOALS & PAYPAY</span>
+                <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/40">
+                  自己実現を応援
+                </span>
+              </h3>
+              <p className="text-[10px] text-gray-400 font-mono">
+                あなたの投げ銭がアーティストの次の創作の一歩に直結します
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Featured Support Goal Cards (DJ DUNE & KASSIS) */}
+        <div className="space-y-3">
+          {(() => {
+            const dune = artists.find((a) => a.id === "artist_dune" || a.name.toLowerCase().includes("dune"));
+            const kassis = artists.find((a) => a.id === "artist_kassis" || a.name.toLowerCase().includes("kassis"));
+            const featuredList = [dune, kassis].filter(Boolean);
+
+            return featuredList.map((artist) => (
+              <div
+                key={artist.id}
+                className="glass-panel border border-red-500/40 hover:border-red-500/70 p-4 rounded-3xl bg-gradient-to-br from-red-950/20 via-dark-card to-pink-950/20 transition-all shadow-xl space-y-3"
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    onClick={() => onSelectArtist(artist)}
+                    className="relative w-14 h-14 rounded-2xl overflow-hidden shrink-0 border border-red-500/40 cursor-pointer shadow-md group"
+                  >
+                    <img
+                      src={artist.image}
+                      alt={artist.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/40 font-bold">
+                        {artist.supportGoal?.tag || "ARTIST GOAL"}
+                      </span>
+                      <span className="text-[10px] text-gray-400 font-mono">
+                        {artist.roleLabel}
+                      </span>
+                    </div>
+                    <h4
+                      onClick={() => onSelectArtist(artist)}
+                      className="text-base font-black text-white hover:text-red-400 cursor-pointer transition-colors truncate"
+                    >
+                      {artist.name}
+                    </h4>
+                  </div>
+                </div>
+
+                {/* Goal Content Box */}
+                <div className="p-3 rounded-2xl bg-dark-bg/90 border border-red-500/30 space-y-1">
+                  <div className="flex items-center justify-between text-[10px] font-mono">
+                    <span className="text-red-400 font-bold flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-red-400" />
+                      自己実現ゴール
+                    </span>
+                    {artist.supportGoal?.targetAmount && (
+                      <span className="text-neon-yellow font-extrabold">
+                        {artist.supportGoal.targetAmount}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs font-bold text-white leading-snug">
+                    {artist.supportGoal?.title}
+                  </p>
+                  <p className="text-[11px] text-gray-300 leading-relaxed pt-0.5">
+                    {artist.supportGoal?.description}
+                  </p>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2 pt-1">
+                  <button
+                    onClick={() => onOpenTipModal(artist, "paypay")}
+                    className="flex-1 bg-gradient-to-r from-red-500 via-pink-600 to-purple-600 hover:opacity-95 text-white font-extrabold text-xs py-2.5 px-3 rounded-xl shadow-lg flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                  >
+                    <Heart className="w-3.5 h-3.5 fill-white" />
+                    <span>PayPayで直接応援する</span>
+                  </button>
+
+                  <button
+                    onClick={() => onSelectArtist(artist)}
+                    className="px-3 py-2.5 rounded-xl bg-dark-surface border border-dark-border text-xs text-gray-300 hover:text-white font-mono flex items-center gap-1 transition-colors"
+                  >
+                    <span>詳細</span>
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ));
+          })()}
+        </div>
+
+        {/* Small explainer note */}
+        <p className="text-[10px] text-gray-400 font-mono text-center px-2 leading-relaxed">
+          ※ PayPay送金のメッセージ（メモ）にアーティスト名を記載することで、実質的な自己実現支援金として届けられます。
+        </p>
+      </div>
+
       {/* Featured Artists Section */}
       <div>
         <div className="flex items-center justify-between mb-4">
@@ -141,7 +255,7 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
               <ArtistCard
                 key={artist.id}
                 artist={artist}
-                onOpenTipModal={(a) => onOpenTipModal(a, "point")}
+                onOpenTipModal={(a) => onOpenTipModal(a, "paypay")}
                 onSelectArtist={onSelectArtist}
               />
             ));

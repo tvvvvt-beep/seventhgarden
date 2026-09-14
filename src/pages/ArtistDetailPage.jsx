@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowLeft, Sparkles, MapPin, Clock, Heart, Globe, Share2, Music } from "lucide-react";
+import { ArrowLeft, Sparkles, MapPin, Clock, Heart, Globe, Share2, Music, Target, QrCode } from "lucide-react";
 import RecentTipsFeed from "../components/RecentTipsFeed";
 
 export default function ArtistDetailPage({ artist, allTips, onBack, onOpenTipModal }) {
@@ -94,14 +94,56 @@ export default function ArtistDetailPage({ artist, allTips, onBack, onOpenTipMod
             </div>
           )}
 
-          {/* Action Tip Button */}
-          <button
-            onClick={() => onOpenTipModal(artist)}
-            className="w-full mt-5 bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan text-white font-extrabold text-sm py-3.5 rounded-xl shadow-neon-pink hover:opacity-95 transition-all flex items-center justify-center gap-2"
-          >
-            <Sparkles className="w-5 h-5 fill-white" />
-            <span>このアーティストにポイントを送る</span>
-          </button>
+          {/* Self-Realization Goal Card (自己実現プロジェクト) */}
+          {artist.supportGoal && (
+            <div className="mt-5 p-4 rounded-2xl bg-gradient-to-br from-red-950/30 via-dark-surface to-pink-950/30 border border-red-500/50 space-y-2 shadow-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-red-400 font-mono text-[10px] font-bold">
+                  <Target className="w-3.5 h-3.5" />
+                  <span>自己実現プロジェクト（投げ銭の使い道）</span>
+                </div>
+                {artist.supportGoal.tag && (
+                  <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/40 font-bold">
+                    {artist.supportGoal.tag}
+                  </span>
+                )}
+              </div>
+
+              <h3 className="text-sm font-black text-white leading-snug">
+                {artist.supportGoal.title}
+              </h3>
+
+              <p className="text-xs text-gray-300 leading-relaxed">
+                {artist.supportGoal.description}
+              </p>
+
+              <div className="pt-2 border-t border-red-500/20 flex items-center justify-between text-[10px] font-mono text-gray-400">
+                <span>送金時メモ欄キーワード</span>
+                <span className="font-extrabold text-neon-yellow">
+                  {artist.supportGoal.memoKeyword || artist.name}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons: PayPay Primary & Point Secondary */}
+          <div className="space-y-2 mt-5">
+            <button
+              onClick={() => onOpenTipModal(artist, "paypay")}
+              className="w-full bg-gradient-to-r from-red-500 via-pink-600 to-neon-purple text-white font-extrabold text-sm py-3.5 rounded-xl shadow-lg hover:opacity-95 transition-all flex items-center justify-center gap-2 active:scale-98"
+            >
+              <Heart className="w-4 h-4 fill-white text-white animate-pulse" />
+              <span>PayPayで自己実現を直接応援する（推奨）</span>
+            </button>
+
+            <button
+              onClick={() => onOpenTipModal(artist, "point")}
+              className="w-full bg-dark-surface hover:bg-dark-border/40 border border-dark-border text-gray-300 hover:text-white font-mono text-xs py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-neon-yellow" />
+              <span>会場演出用の無料ポイント（PT）を送る</span>
+            </button>
+          </div>
         </div>
       </div>
 

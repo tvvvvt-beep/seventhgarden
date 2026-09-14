@@ -36,7 +36,7 @@ function MainApp() {
     loadData();
   }, []);
 
-  const handleOpenTipModal = (artist = null, mode = "point") => {
+  const handleOpenTipModal = (artist = null, mode = "paypay") => {
     setTipModalConfig({ artist, mode });
   };
 
