@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/useAuth";
 import { sendTipTransaction } from "../firebase/services";
-import { Sparkles, Heart, CheckCircle2, AlertCircle, X, Send, Info, Copy, Check, Coins } from "lucide-react";
+import { Heart, CheckCircle2, AlertCircle, X, Send, Info, Copy, Check, Coins, PartyPopper } from "lucide-react";
 import confetti from "canvas-confetti";
 
 export default function TipModal({ artist, initialMode = "paypay", onClose, onSuccess }) {
@@ -139,46 +139,103 @@ export default function TipModal({ artist, initialMode = "paypay", onClose, onSu
              Mode A: Event-wide PayPay Donation (全体応援)
              ========================================================================= */
           <div className="space-y-4 text-center">
-            <div className="flex items-center gap-3 border-b border-dark-border pb-4 text-left">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-red-500 to-pink-600 flex items-center justify-center text-white shadow-lg shrink-0">
-                <Heart className="w-6 h-6 fill-white text-white" />
-              </div>
-              <div>
-                <span className="text-[10px] text-red-400 font-mono font-bold block">EVENT DONATION</span>
-                <h3 className="text-base font-extrabold text-white">7TH GARDEN 投げ銭</h3>
-                <p className="text-[11px] text-gray-400">イベント全体・コミュニティ空間への応援</p>
+            {/* 送金先ヘッダー: 誰に送るのかを明確化 */}
+            <div className="bg-gradient-to-r from-red-600 via-pink-600 to-purple-600 p-0.5 rounded-2xl shadow-neon-pink">
+              <div className="bg-dark-card/95 rounded-[14px] p-3 flex items-center gap-3 text-left">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-red-500 to-pink-600 flex items-center justify-center text-white shadow-lg shrink-0">
+                  <Heart className="w-6 h-6 fill-white text-white animate-pulse" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <span className="text-[10px] text-red-400 font-mono font-bold block">
+                    ▼ 送金先
+                  </span>
+                  <h3 className="text-base font-black text-white truncate">
+                    7TH GARDEN イベント全体
+                  </h3>
+                  <p className="text-[11px] text-gray-300">
+                    フロア空間演出・音響・コミュニティ運営への直接応援
+                  </p>
+                </div>
               </div>
             </div>
 
-            <div className="bg-dark-bg/90 border border-red-500/40 p-4 rounded-2xl space-y-3">
-              <span className="inline-block px-3 py-1 bg-red-500/20 text-red-400 border border-red-500/40 font-mono text-[10px] font-bold rounded-full">
-                PayPay 専用 QRコード
-              </span>
-
-              {/* PayPay QR Code Display */}
-              <div className="relative w-48 h-48 mx-auto bg-white p-2.5 rounded-2xl shadow-2xl border-2 border-red-500/60 flex items-center justify-center">
-                <img
-                  src="/paypay-qr.png"
-                  alt="PayPay 投げ銭 QRコード"
-                  className="w-full h-full object-contain rounded-xl"
-                />
+            {/* PayPay QR Code Display (盛り上げネオン・オーラ演出) */}
+            <div className="bg-dark-bg/95 border border-red-500/50 p-4 rounded-3xl space-y-3 shadow-2xl">
+              <div className="flex items-center justify-center gap-1.5">
+                <span className="px-3 py-1 bg-gradient-to-r from-red-500 to-pink-600 text-white font-mono text-[10px] font-black rounded-full shadow-lg tracking-wider flex items-center gap-1">
+                  🔥 7TH GARDEN BOOST QR 🔥
+                </span>
               </div>
 
-              <p className="text-xs text-gray-200 font-bold">
-                金額は自由です（例: 300円、500円、1,000円など）
-              </p>
+              {/* Glowing Aura + QR Frame */}
+              <div className="relative w-52 h-52 mx-auto flex items-center justify-center my-1">
+                {/* Multi-color ambient animated glowing aura */}
+                <div className="absolute -inset-2 bg-gradient-to-r from-red-500 via-neon-pink to-purple-600 rounded-3xl blur-md opacity-80 animate-pulse" />
+                
+                {/* QR Card container */}
+                <div className="relative w-full h-full bg-white p-3 rounded-2xl shadow-2xl border-2 border-red-500 flex flex-col items-center justify-center overflow-hidden">
+                  <div className="absolute top-1.5 left-2 right-2 bg-red-600 text-white text-[9px] font-black font-mono py-0.5 rounded flex items-center justify-center gap-1 shadow">
+                    <Heart className="w-2.5 h-2.5 fill-white" />
+                    <span>7TH GARDEN 投げ銭 QR</span>
+                  </div>
+                  <img
+                    src="/paypay-qr.png"
+                    alt="PayPay 投げ銭 QRコード"
+                    className="w-full h-full object-contain pt-3"
+                  />
+                </div>
+              </div>
+
+              {/* 乾杯・ブーストの目安目安 */}
+              <div className="space-y-1.5 pt-1">
+                <p className="text-[10px] font-mono text-gray-300 font-bold">
+                  ✨ 一杯奢る感覚で気軽に投げ銭！（金額自由） ✨
+                </p>
+                <div className="grid grid-cols-4 gap-1.5 text-center">
+                  <div className="p-2 rounded-xl bg-dark-surface/90 border border-white/10">
+                    <span className="text-base block">🍸</span>
+                    <span className="text-[11px] font-black text-white font-mono block">¥300</span>
+                    <span className="text-[8px] text-gray-400 font-bold">乾杯ドリンク</span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-dark-surface/90 border border-white/10">
+                    <span className="text-base block">🔥</span>
+                    <span className="text-[11px] font-black text-white font-mono block">¥500</span>
+                    <span className="text-[8px] text-gray-400 font-bold">フロアブースト</span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-dark-surface/90 border border-pink-500/40 bg-pink-500/10">
+                    <span className="text-base block">🚀</span>
+                    <span className="text-[11px] font-black text-neon-yellow font-mono block">¥1,000</span>
+                    <span className="text-[8px] text-pink-300 font-bold">空間演出支援</span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-dark-surface/90 border border-purple-500/40 bg-purple-500/10">
+                    <span className="text-base block">👑</span>
+                    <span className="text-[11px] font-black text-neon-cyan font-mono block">¥3,000~</span>
+                    <span className="text-[8px] text-purple-300 font-bold">VIPパトロン</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 盛り上げクラッカーボタン */}
+              <button
+                type="button"
+                onClick={triggerConfetti}
+                className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-neon-purple/30 to-pink-500/30 hover:from-neon-purple/50 hover:to-pink-500/50 border border-neon-purple/40 text-neon-yellow font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm"
+              >
+                <PartyPopper className="w-4 h-4 text-neon-yellow" />
+                <span>🎉 クラッカーを鳴らしてフロアを祝う！ (タップ)</span>
+              </button>
             </div>
 
             {/* Instructions Steps */}
-            <div className="bg-dark-surface border border-dark-border p-3 rounded-2xl text-left text-xs font-mono space-y-2">
-              <div className="flex items-center gap-1.5 text-neon-cyan font-bold mb-1">
+            <div className="bg-dark-surface border border-dark-border p-3 rounded-2xl text-left text-xs font-mono space-y-1.5">
+              <div className="flex items-center gap-1.5 text-neon-cyan font-bold">
                 <Info className="w-4 h-4" />
-                <span>PayPay 投げ銭の使い方</span>
+                <span>PayPay 投げ銭の送金手順</span>
               </div>
-              <ol className="space-y-1.5 text-[11px] text-gray-300 list-decimal list-inside leading-relaxed">
+              <ol className="space-y-1 text-[11px] text-gray-300 list-decimal list-inside leading-relaxed">
                 <li>PayPayアプリを開き「スキャン」をタップ</li>
                 <li>上のQRコードをスキャン</li>
-                <li>お好きな金額を入力して送金</li>
+                <li>お好きな金額を入力して送金完了！</li>
               </ol>
             </div>
 
@@ -288,34 +345,125 @@ export default function TipModal({ artist, initialMode = "paypay", onClose, onSu
                   </div>
                 )}
 
-                {/* PayPay QR Code Display */}
-                <div className="bg-dark-bg/90 border border-red-500/40 p-3 rounded-2xl text-center space-y-2">
-                  <div className="relative w-44 h-44 mx-auto bg-white p-2.5 rounded-2xl shadow-xl border-2 border-red-500/60 flex items-center justify-center">
-                    <img
-                      src="/paypay-qr.png"
-                      alt="PayPay 投げ銭 QRコード"
-                      className="w-full h-full object-contain rounded-xl"
-                    />
+                {/* 送金先ヘッダー: 誰に送るのかを明確化 */}
+                <div className="bg-gradient-to-r from-red-600 via-pink-600 to-purple-600 p-0.5 rounded-2xl shadow-neon-pink">
+                  <div className="bg-dark-card/95 rounded-[14px] p-3 flex items-center justify-between gap-3 text-left">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <img
+                        src={artist.image}
+                        alt={artist.name}
+                        className="w-11 h-11 rounded-xl object-cover border-2 border-red-500 shrink-0 shadow-md"
+                      />
+                      <div className="min-w-0">
+                        <span className="text-[10px] text-red-400 font-mono font-bold block">
+                          ▼ 送金先アーティスト
+                        </span>
+                        <h3 className="text-base font-black text-white truncate">
+                          {artist.name}
+                        </h3>
+                      </div>
+                    </div>
+
+                    {artist.supportGoal ? (
+                      <span className="px-2.5 py-1 bg-red-500/20 text-neon-yellow border border-red-500/40 rounded-xl text-[10px] font-mono font-extrabold shrink-0">
+                        🎯 {artist.supportGoal.tag}
+                      </span>
+                    ) : (
+                      <span className="px-2.5 py-1 bg-white/10 text-gray-300 border border-white/20 rounded-xl text-[10px] font-mono font-bold shrink-0">
+                        {artist.roleLabel || "ARTIST"}
+                      </span>
+                    )}
                   </div>
-                  <p className="text-[11px] text-gray-200 font-bold">
-                    送金額は自由です（例: 300円、500円、1,000円、3,000円〜）
-                  </p>
+                </div>
+
+                {/* PayPay QR Code Display (盛り上げネオン・オーラ演出) */}
+                <div className="bg-dark-bg/95 border border-red-500/50 p-4 rounded-3xl space-y-3 shadow-2xl text-center">
+                  <div className="flex items-center justify-center gap-1.5">
+                    <span className="px-3 py-1 bg-gradient-to-r from-red-500 to-pink-600 text-white font-mono text-[10px] font-black rounded-full shadow-lg tracking-wider flex items-center gap-1">
+                      🔥 {artist.name} BOOST QR 🔥
+                    </span>
+                  </div>
+
+                  {/* Glowing Aura + QR Frame */}
+                  <div className="relative w-52 h-52 mx-auto flex items-center justify-center my-1">
+                    {/* Multi-color ambient animated glowing aura */}
+                    <div className="absolute -inset-2 bg-gradient-to-r from-red-500 via-neon-pink to-purple-600 rounded-3xl blur-md opacity-80 animate-pulse" />
+                    
+                    {/* QR Card container */}
+                    <div className="relative w-full h-full bg-white p-3 rounded-2xl shadow-2xl border-2 border-red-500 flex flex-col items-center justify-center overflow-hidden">
+                      <div className="absolute top-1.5 left-2 right-2 bg-red-600 text-white text-[9px] font-black font-mono py-0.5 rounded flex items-center justify-center gap-1 shadow truncate">
+                        <Heart className="w-2.5 h-2.5 fill-white shrink-0" />
+                        <span className="truncate">{artist.name} 宛て投げ銭</span>
+                      </div>
+                      <img
+                        src="/paypay-qr.png"
+                        alt="PayPay 投げ銭 QRコード"
+                        className="w-full h-full object-contain pt-3"
+                      />
+                    </div>
+                  </div>
+
+                  {/* 乾杯・ブーストの目安目安 */}
+                  <div className="space-y-1.5 pt-1">
+                    <p className="text-[10px] font-mono text-gray-300 font-bold">
+                      ✨ {artist.name} へ乾杯やブーストを送る！（金額自由） ✨
+                    </p>
+                    <div className="grid grid-cols-4 gap-1.5 text-center">
+                      <div className="p-2 rounded-xl bg-dark-surface/90 border border-white/10">
+                        <span className="text-base block">🍸</span>
+                        <span className="text-[11px] font-black text-white font-mono block">¥300</span>
+                        <span className="text-[8px] text-gray-400 font-bold">乾杯ドリンク</span>
+                      </div>
+                      <div className="p-2 rounded-xl bg-dark-surface/90 border border-white/10">
+                        <span className="text-base block">🔥</span>
+                        <span className="text-[11px] font-black text-white font-mono block">¥500</span>
+                        <span className="text-[8px] text-gray-400 font-bold">フロア熱気!</span>
+                      </div>
+                      <div className="p-2 rounded-xl bg-dark-surface/90 border border-pink-500/40 bg-pink-500/10">
+                        <span className="text-base block">🚀</span>
+                        <span className="text-[11px] font-black text-neon-yellow font-mono block">¥1,000</span>
+                        <span className="text-[8px] text-pink-300 font-bold">
+                          {artist.supportGoal ? "自己実現支援" : "大声援ブースト"}
+                        </span>
+                      </div>
+                      <div className="p-2 rounded-xl bg-dark-surface/90 border border-purple-500/40 bg-purple-500/10">
+                        <span className="text-base block">👑</span>
+                        <span className="text-[11px] font-black text-neon-cyan font-mono block">¥3,000~</span>
+                        <span className="text-[8px] text-purple-300 font-bold">VIPサポーター</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 盛り上げクラッカーボタン */}
+                  <button
+                    type="button"
+                    onClick={triggerConfetti}
+                    className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-neon-purple/30 to-pink-500/30 hover:from-neon-purple/50 hover:to-pink-500/50 border border-neon-purple/40 text-neon-yellow font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-sm"
+                  >
+                    <PartyPopper className="w-4 h-4 text-neon-yellow" />
+                    <span>🎉 クラッカーを鳴らして {artist.name} を祝う！ (タップ)</span>
+                  </button>
                 </div>
 
                 {/* 重要：PayPayメモ欄入力案内 & ワンタップコピー */}
-                <div className="p-3 bg-red-950/30 border border-red-500/40 rounded-2xl space-y-2 text-left">
-                  <div className="flex items-start gap-1.5 text-xs text-red-300 font-bold">
-                    <Info className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
-                    <span>【重要】PayPay送金時のメッセージ（メモ）入力</span>
+                <div className="p-3.5 bg-gradient-to-br from-red-950/60 to-dark-bg border-2 border-red-500/60 rounded-2xl space-y-2 text-left shadow-lg">
+                  <div className="flex items-center justify-between text-xs font-bold text-white">
+                    <span className="flex items-center gap-1.5 text-neon-yellow font-black">
+                      <AlertCircle className="w-4 h-4 text-neon-yellow shrink-0" />
+                      PayPay送金メモに「{memoKeyword}」と記入！
+                    </span>
+                    <span className="text-[9px] font-mono text-red-300 bg-red-500/30 px-2 py-0.5 rounded-full border border-red-500/50">
+                      送金先を明記
+                    </span>
                   </div>
                   <p className="text-[11px] text-gray-300 leading-relaxed">
-                    PayPayの送金画面にある<strong>「メッセージ」または「メモ」</strong>欄に、以下のキーワードを入力して送金してください。集まった支援金が確実に<strong>{artist.name}</strong>へ届けられます。
+                    PayPayの送金画面にある<strong>「メッセージ」または「メモ」</strong>欄に、以下のキーワードを貼り付けて送金してください。集まった支援金が確実に<strong>{artist.name}</strong>の元へ届けられます。
                   </p>
 
-                  <div className="flex items-center justify-between p-2.5 bg-dark-bg/90 border border-red-500/30 rounded-xl">
+                  <div className="flex items-center justify-between p-2.5 bg-black/80 border border-red-500/50 rounded-xl">
                     <div>
-                      <span className="text-[9px] text-gray-400 font-mono block">メモ用キーワード</span>
-                      <span className="font-mono font-black text-sm text-neon-yellow tracking-wider">
+                      <span className="text-[9px] text-gray-400 font-mono block">誰宛てか（入力キーワード）</span>
+                      <span className="font-mono font-black text-base text-neon-yellow tracking-wider">
                         {memoKeyword}
                       </span>
                     </div>
@@ -323,13 +471,13 @@ export default function TipModal({ artist, initialMode = "paypay", onClose, onSu
                     <button
                       type="button"
                       onClick={() => handleCopyKeyword(memoKeyword)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center gap-1 transition-all ${
+                      className={`px-3.5 py-2 rounded-xl text-xs font-mono font-extrabold flex items-center gap-1.5 transition-all shadow-md ${
                         copied
-                          ? "bg-green-600 text-white shadow-md scale-105"
-                          : "bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40"
+                          ? "bg-green-600 text-white scale-105"
+                          : "bg-gradient-to-r from-red-500 to-pink-600 hover:opacity-90 text-white"
                       }`}
                     >
-                      {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                       <span>{copied ? "コピー完了!" : "名前をコピー"}</span>
                     </button>
                   </div>

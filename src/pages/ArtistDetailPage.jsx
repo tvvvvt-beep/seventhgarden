@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowLeft, Sparkles, MapPin, Clock, Heart, Globe, Share2, Music, Target, QrCode } from "lucide-react";
+import { ArrowLeft, Sparkles, MapPin, Clock, Heart, Globe, Share2, Target } from "lucide-react";
 import RecentTipsFeed from "../components/RecentTipsFeed";
 
 export default function ArtistDetailPage({ artist, allTips, onBack, onOpenTipModal }) {
@@ -133,7 +133,7 @@ export default function ArtistDetailPage({ artist, allTips, onBack, onOpenTipMod
               className="w-full bg-gradient-to-r from-red-500 via-pink-600 to-neon-purple text-white font-extrabold text-sm py-3.5 rounded-xl shadow-lg hover:opacity-95 transition-all flex items-center justify-center gap-2 active:scale-98"
             >
               <Heart className="w-4 h-4 fill-white text-white animate-pulse" />
-              <span>PayPayで自己実現を直接応援する（推奨）</span>
+              <span>PayPayで【{artist.name}】を直接応援する（推奨）</span>
             </button>
 
             <button

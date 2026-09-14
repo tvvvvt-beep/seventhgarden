@@ -87,27 +87,30 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
       </div>
 
       {/* Single One-Click Event Support PayPay Banner */}
-      <div className="bg-gradient-to-r from-red-950/70 via-dark-card to-pink-950/70 border border-red-500/60 p-4 rounded-3xl flex items-center justify-between gap-3 shadow-2xl">
-        <div className="flex items-center gap-3">
+      <div className="bg-gradient-to-r from-red-950/80 via-dark-card to-pink-950/80 border-2 border-red-500/60 p-4 rounded-3xl flex items-center justify-between gap-3 shadow-2xl relative overflow-hidden group">
+        <div className="flex items-center gap-3 min-w-0">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-red-500 to-pink-600 flex items-center justify-center text-white shadow-lg shrink-0">
             <Heart className="w-6 h-6 fill-white text-white animate-pulse" />
           </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-extrabold text-white">イベント投げ銭（PayPay）</span>
-              <span className="px-2 py-0.5 bg-red-500/20 text-red-400 text-[9px] font-mono font-bold rounded-full border border-red-500/40">
-                金額自由
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+              <span className="text-[9px] font-mono px-2 py-0.5 bg-red-500/20 text-red-400 font-bold rounded-full border border-red-500/40">
+                【送金先】イベント全体
+              </span>
+              <span className="text-[9px] font-mono px-2 py-0.5 bg-yellow-500/20 text-neon-yellow font-bold rounded-full border border-yellow-500/40">
+                🍸 乾杯 ¥300〜
               </span>
             </div>
+            <h3 className="text-xs font-black text-white truncate">7TH GARDEN 投げ銭（PayPay）</h3>
             <p className="text-[11px] text-gray-300 mt-0.5 leading-snug">
-              7TH GARDEN イベント全体への応援・ドネーションをPayPayで受け付けています。
+              フロア空間・演出を直接支えるドネーションQRはこちらから！
             </p>
           </div>
         </div>
 
         <button
           onClick={() => onOpenTipModal(null, "paypay")}
-          className="bg-gradient-to-r from-red-500 to-pink-600 hover:opacity-90 text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-lg shrink-0 transition-all font-mono flex items-center gap-1.5 active:scale-95"
+          className="bg-gradient-to-r from-red-500 to-pink-600 hover:opacity-95 text-white font-black text-xs px-3.5 py-3 rounded-xl shadow-lg shrink-0 transition-all font-mono flex items-center gap-1.5 active:scale-95 animate-pulse"
         >
           <QrCode className="w-4 h-4" />
           <span>PayPay QR</span>
@@ -163,7 +166,7 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 mb-0.5">
                       <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/40 font-bold">
-                        {artist.supportGoal?.tag || "ARTIST GOAL"}
+                        【送金先】{artist.name}
                       </span>
                       <span className="text-[10px] text-gray-400 font-mono">
                         {artist.roleLabel}
@@ -203,10 +206,10 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
                 <div className="flex items-center gap-2 pt-1">
                   <button
                     onClick={() => onOpenTipModal(artist, "paypay")}
-                    className="flex-1 bg-gradient-to-r from-red-500 via-pink-600 to-purple-600 hover:opacity-95 text-white font-extrabold text-xs py-2.5 px-3 rounded-xl shadow-lg flex items-center justify-center gap-1.5 transition-all active:scale-95"
+                    className="flex-1 bg-gradient-to-r from-red-500 via-pink-600 to-purple-600 hover:opacity-95 text-white font-black text-xs py-2.5 px-3 rounded-xl shadow-lg flex items-center justify-center gap-1.5 transition-all active:scale-95"
                   >
                     <Heart className="w-3.5 h-3.5 fill-white" />
-                    <span>PayPayで直接応援する</span>
+                    <span>PayPayで【{artist.name}】を直接応援</span>
                   </button>
 
                   <button
