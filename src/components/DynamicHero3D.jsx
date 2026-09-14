@@ -2,32 +2,73 @@ import React, { useRef, useEffect, useState } from "react";
 import * as THREE from "three";
 import { Maximize2, RotateCcw } from "lucide-react";
 
-// Canvasから純粋なホワイトタイポグラフィテクスチャを生成（枠線なし・透明背景・シャープな文字）
-function createTextTexture(text, textColor = "#ffffff", fontSize = 42) {
+// Canvasから高精細・可読性重視のタイポグラフィテクスチャを生成
+// （枠線なし・半透明ダークピル＆黒アウトラインで写真の上に重なっても100%読める）
+function createTextTexture(text, options = {}) {
+  const {
+    textColor = "#ffffff",
+    fontSize = 44,
+    fontWeight = "bold",
+    fontFamily = "'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  } = options;
+
+  // Retina 2x 高解像度レンダリング
+  const dpr = 2;
+  const tempCanvas = document.createElement("canvas");
+  const tempCtx = tempCanvas.getContext("2d");
+  tempCtx.font = `${fontWeight} ${fontSize * dpr}px ${fontFamily}`;
+  const textMetrics = tempCtx.measureText(text);
+  const textWidth = textMetrics.width;
+
+  // パディングを確保し、長いテキストでも端が絶対に切れないように計算
+  const padX = 24 * dpr;
+  const padY = 12 * dpr;
+  const canvasWidth = Math.ceil(textWidth + padX * 2);
+  const canvasHeight = Math.ceil(fontSize * 1.5 * dpr + padY * 2);
+
   const canvas = document.createElement("canvas");
+  canvas.width = canvasWidth;
+  canvas.height = canvasHeight;
   const ctx = canvas.getContext("2d");
-  canvas.width = 512;
-  canvas.height = 100;
 
-  // 完全透明背景（枠線・ボックスなし）
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // 半透明ダークピル（枠線ではなく、写真や背景の上に重なっても確実に文字を読めるようにするバックドロップ）
+  ctx.save();
+  ctx.fillStyle = "rgba(6, 8, 14, 0.78)";
+  const radius = canvasHeight * 0.28;
+  ctx.beginPath();
+  ctx.roundRect(padX * 0.25, padY * 0.25, canvasWidth - padX * 0.5, canvasHeight - padY * 0.5, radius);
+  ctx.fill();
+  ctx.restore();
 
-  // 文字のドロップシャドウ（背景と重なってもくっきり読めるように）
-  ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
-  ctx.shadowBlur = 10;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 2;
-
-  // タイポグラフィ描画
-  ctx.fillStyle = textColor;
-  ctx.font = `bold ${fontSize}px 'Space Grotesk', -apple-system, sans-serif`;
+  // フォント描画設定
+  ctx.font = `${fontWeight} ${fontSize * dpr}px ${fontFamily}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+  const cx = canvasWidth / 2;
+  const cy = canvasHeight / 2;
+
+  // 太い黒アウトライン（写真のハイライト部分と重なっても輪郭を完璧に際立たせる）
+  ctx.lineJoin = "round";
+  ctx.miterLimit = 2;
+  ctx.strokeStyle = "rgba(0, 0, 0, 0.95)";
+  ctx.lineWidth = 6 * dpr;
+  ctx.strokeText(text, cx, cy);
+
+  // 文字本体（純白・シルバー）
+  ctx.fillStyle = textColor;
+  ctx.fillText(text, cx, cy);
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
-  return tex;
+  tex.minFilter = THREE.LinearFilter;
+  tex.magFilter = THREE.LinearFilter;
+  tex.generateMipmaps = false;
+
+  return {
+    texture: tex,
+    aspect: canvasWidth / canvasHeight,
+  };
 }
 
 export default function DynamicHero3D({ 
@@ -109,9 +150,8 @@ export default function DynamicHero3D({
       side: THREE.FrontSide, // 正面・反転なし
     });
     const photoMesh = new THREE.Mesh(photoGeom, photoMat);
-    photoMesh.position.set(0, 0, 0.2);
+    photoMesh.position.set(0, 0.05, 0.1);
     mainGroup.add(photoMesh);
-    // ※枠線(photoFrame)は完全に排除
 
     // --- (B) 奥のシネマティックワイドバナー (枠線なし) ---
     const bannerGeom = new THREE.PlaneGeometry(4.8, 2.035);
@@ -127,62 +167,64 @@ export default function DynamicHero3D({
     bannerMesh.position.set(0, 0.3, -1.5);
     mainGroup.add(bannerMesh);
 
-    // --- (C) 写真以外の全フライヤー要素（枠線なし・モノトーン/ホワイトの文字素材） ---
+    // --- (C) 写真以外の全フライヤー要素（堂々たるスタック配置・重なっても全部読める） ---
+    // フライヤー原本に記載されている全情報を完全に網羅
     const textItems = [
-      { text: "7th GARDEN", color: "#ffffff", size: 46, pos: [-1.6, 1.4, 0.6], scale: 1.1 },
-      { text: "09/17 (THU)", color: "#f8fafc", size: 44, pos: [1.6, 1.4, 0.6], scale: 1.0 },
-      { text: "Compufunk Records & BAR", color: "#ffffff", size: 40, pos: [0, -1.85, 0.7], scale: 1.15 },
-      { text: "18:00~24:00 Charge Free", color: "#e2e8f0", size: 36, pos: [0, -2.25, 0.6], scale: 0.95 },
-      { text: "toru yamanaka (Dumb Type)", color: "#ffffff", size: 38, pos: [-1.75, 0.8, 0.4], scale: 0.9 },
-      { text: "Dune (U.V.)", color: "#f1f5f9", size: 38, pos: [1.75, 0.8, 0.4], scale: 0.85 },
-      { text: "tvvt", color: "#ffffff", size: 40, pos: [-1.65, 0.2, 0.5], scale: 0.8 },
-      { text: "KASSIS. (MOKSA.)", color: "#f1f5f9", size: 38, pos: [1.65, 0.2, 0.5], scale: 0.85 },
-      { text: "youngANDoldNEVERdie", color: "#f8fafc", size: 36, pos: [-1.7, -0.4, 0.45], scale: 0.85 },
-      { text: "Selector: Sen 11", color: "#e2e8f0", size: 38, pos: [1.7, -0.4, 0.45], scale: 0.85 },
-      { text: "CRYSTAL BOWL: tamako", color: "#f1f5f9", size: 38, pos: [-1.6, -1.0, 0.4], scale: 0.85 },
-      { text: "Live P.A.: Sen & Jerry", color: "#f8fafc", size: 38, pos: [1.6, -1.0, 0.4], scale: 0.85 },
-      { text: "LIVE PAINT + VISUALS : FisH + HIWATASHI", color: "#ffffff", size: 34, pos: [0, 1.95, 0.5], scale: 1.0 },
-      { text: "PayPay tipping method", color: "#e2e8f0", size: 36, pos: [1.5, -2.6, 0.5], scale: 0.8 },
-      { text: "PLACE FOR ART AND MUSIC", color: "#cbd5e1", size: 36, pos: [-1.4, -2.6, 0.5], scale: 0.8 },
+      { text: "7th GARDEN", color: "#ffffff", size: 54, height: 0.44, pos: [0, 1.82, 0.65] },
+      { text: "09/17 (THU)", color: "#f8fafc", size: 44, height: 0.36, pos: [0, 1.42, 0.62] },
+      { text: "Compufunk Records & BAR", color: "#ffffff", size: 44, height: 0.36, pos: [0, 1.02, 0.6] },
+      { text: "18:00~24:00 Charge Free", color: "#e2e8f0", size: 40, height: 0.32, pos: [0, 0.64, 0.58] },
+      { text: "DJ: toru yamanaka (Dumb Type)", color: "#ffffff", size: 36, height: 0.29, pos: [0, 0.28, 0.56] },
+      { text: "Dune (U.V.)  /  tvvt", color: "#f1f5f9", size: 36, height: 0.29, pos: [0, -0.06, 0.55] },
+      { text: "KASSIS. (MOKSA.)  /  youngANDoldNEVERdie", color: "#f8fafc", size: 34, height: 0.28, pos: [0, -0.40, 0.54] },
+      { text: "Selector: Sen 11", color: "#e2e8f0", size: 34, height: 0.28, pos: [-0.62, -0.74, 0.52] },
+      { text: "CRYSTAL BOWL: tamako", color: "#f1f5f9", size: 34, height: 0.28, pos: [0.62, -0.74, 0.52] },
+      { text: "Live P.A.: Sen & Jerry", color: "#f8fafc", size: 34, height: 0.28, pos: [0, -1.06, 0.52] },
+      { text: "LIVE PAINT + VISUALS : FisH + HIWATASHI", color: "#ffffff", size: 34, height: 0.28, pos: [0, -1.40, 0.52] },
+      { text: "PLACE FOR ART AND MUSIC", color: "#cbd5e1", size: 32, height: 0.26, pos: [-0.60, -1.74, 0.5] },
+      { text: "\"PayPay tipping method\"", color: "#e2e8f0", size: 32, height: 0.26, pos: [0.60, -1.74, 0.5] },
     ];
 
     const textMeshes = [];
-    const textGeom = new THREE.PlaneGeometry(1.6, 0.32);
 
     textItems.forEach((item, index) => {
-      // 枠線なし・純粋なホワイトテキストテクスチャ
-      const tex = createTextTexture(item.text, item.color, item.size);
+      // 動的Canvasでアスペクト比を自動算出し、一切文字切れ・歪みなしで生成
+      const { texture, aspect } = createTextTexture(item.text, {
+        textColor: item.color,
+        fontSize: item.size,
+      });
+
+      const geom = new THREE.PlaneGeometry(item.height * aspect, item.height);
       const mat = new THREE.MeshBasicMaterial({
-        map: tex,
+        map: texture,
         transparent: true,
         side: THREE.DoubleSide,
         depthWrite: false,
       });
 
-      const mesh = new THREE.Mesh(textGeom, mat);
-      mesh.scale.set(item.scale, item.scale, 1);
+      const mesh = new THREE.Mesh(geom, mat);
 
       // 初期配置 (定位置)
       mesh.position.set(item.pos[0], item.pos[1], item.pos[2]);
 
       // スピン・渦巻き動作用パラメータ
       const angle = (index / textItems.length) * Math.PI * 2;
-      const speed = 2.0 + Math.random() * 3.5;
-      const radius = 1.8 + Math.random() * 2.2;
-      const dir = Math.random() > 0.5 ? 1 : -1;
+      const speed = 2.0 + Math.random() * 3.0;
+      const radius = 1.8 + Math.random() * 2.0;
+      const dir = index % 2 === 0 ? 1 : -1;
 
       mesh.userData = {
         homePos: new THREE.Vector3(...item.pos),
-        homeRot: new THREE.Euler(0, 0, 0),
+        geometry: geom,
         angle: angle,
         orbitSpeed: speed * dir,
         orbitRadius: radius,
         spinSpeedX: (Math.random() - 0.5) * 8.0,
         spinSpeedY: (Math.random() - 0.5) * 12.0,
         spinSpeedZ: (Math.random() - 0.5) * 6.0,
-        zSpread: (Math.random() - 0.5) * 3.5,
+        zSpread: (Math.random() - 0.5) * 3.0,
         material: mat,
-        texture: tex,
+        texture: texture,
       };
 
       mainGroup.add(mesh);
@@ -283,10 +325,13 @@ export default function DynamicHero3D({
         }
         const chaos = chaosProgress.current;
 
-        // 1. カメラワーク（緩やかな動画的ズーム＆パン）
-        const camX = Math.sin(t * 0.3) * 0.2 + mousePos.current.x * 0.6;
-        const camY = Math.cos(t * 0.25) * 0.15 + mousePos.current.y * 0.6;
-        const camZ = 6.4 + Math.sin(t * 0.2) * 0.25 - chaos * 0.4;
+        // 1. カメラワーク（緩やかな動画的ズーム＆パン ＋ スマホ・PC自動フィッティング）
+        const aspect = width / height;
+        // 横幅3.0のテキスト群がどの画面比率でも絶対に画面外に見切れないようにカメラ距離を算出
+        const fitZ = Math.max(5.8, 3.2 / (0.8284 * Math.max(aspect, 0.48)));
+        const camX = Math.sin(t * 0.3) * 0.15 + mousePos.current.x * 0.4;
+        const camY = Math.cos(t * 0.25) * 0.12 + mousePos.current.y * 0.4;
+        const camZ = fitZ + Math.sin(t * 0.2) * 0.2 - chaos * 0.4;
 
         camera.position.set(camX, camY, camZ);
         camera.lookAt(0, 0, 0);
@@ -294,7 +339,7 @@ export default function DynamicHero3D({
         // 2. 中央の写真アートワーク（微小な呼吸と、クリック時のパルス）
         const pulseScale = 1.0 + chaos * 0.1;
         photoMesh.scale.set(pulseScale, pulseScale, 1);
-        photoMesh.position.y = Math.sin(t * 0.7) * 0.06;
+        photoMesh.position.y = 0.05 + Math.sin(t * 0.7) * 0.05;
         photoMesh.rotation.y = Math.sin(t * 0.4) * 0.08 + mousePos.current.x * 0.2;
         photoMesh.rotation.x = -Math.cos(t * 0.4) * 0.06 - mousePos.current.y * 0.2;
 
@@ -303,8 +348,8 @@ export default function DynamicHero3D({
           const u = mesh.userData;
 
           // 平常時の微細な浮遊位置
-          const idleOffsetX = Math.sin(t * 1.2 + u.angle) * 0.05;
-          const idleOffsetY = Math.cos(t * 1.0 + u.angle) * 0.06;
+          const idleOffsetX = Math.sin(t * 1.2 + u.angle) * 0.04;
+          const idleOffsetY = Math.cos(t * 1.0 + u.angle) * 0.04;
           const idlePos = new THREE.Vector3(
             u.homePos.x + idleOffsetX,
             u.homePos.y + idleOffsetY,
@@ -385,7 +430,6 @@ export default function DynamicHero3D({
       photoGeom.dispose();
       bannerGeom.dispose();
       particleGeom.dispose();
-      textGeom.dispose();
       photoMat.dispose();
       bannerMat.dispose();
       particleMat.dispose();
@@ -393,6 +437,7 @@ export default function DynamicHero3D({
       bannerTex.dispose();
 
       textMeshes.forEach((mesh) => {
+        mesh.userData.geometry.dispose();
         mesh.userData.material.dispose();
         mesh.userData.texture.dispose();
       });
@@ -406,7 +451,7 @@ export default function DynamicHero3D({
       {/* 3D Motion Canvas */}
       <div 
         ref={mountRef} 
-        className="w-full h-[460px] sm:h-[520px] relative overflow-hidden cursor-pointer"
+        className="w-full h-[500px] sm:h-[560px] relative overflow-hidden cursor-pointer"
         title="タップ/クリックでテキストがぐるぐる回転して元に戻ります"
       />
 
