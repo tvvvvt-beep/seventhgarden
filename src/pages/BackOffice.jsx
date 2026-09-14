@@ -3,7 +3,7 @@ import { useAuth } from "../context/useAuth";
 import { getEventInfo } from "../firebase/eventConfig";
 import { loadBackOffice } from "../firebase/adminStore";
 import { 
-  Lock, Rocket, Users, Film, Share2, CalendarClock, 
+  Lock, Rocket, Users, Image as ImageIcon, Share2, CalendarClock, 
   ShieldCheck 
 } from "lucide-react";
 
@@ -176,8 +176,8 @@ export default function BackOffice({ onEventUpdated }) {
     {
       id: "promo_assets",
       label: "宣伝素材",
-      sublabel: "フライヤー・動画・POP",
-      icon: Film,
+      sublabel: "フライヤー・POP・QR",
+      icon: ImageIcon,
       color: "from-neon-cyan to-neon-purple",
       borderColor: "border-neon-cyan"
     },

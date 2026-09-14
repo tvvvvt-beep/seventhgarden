@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { 
-  FileText, Film, Image as ImageIcon, Download, Copy, Check, 
-  ExternalLink, Eye, QrCode, Play, Pause, Sparkles 
+  FileText, ImageIcon, Download, Copy, Check, 
+  Eye 
 } from "lucide-react";
 
 export default function PromoAssetsTab() {
   const [copiedId, setCopiedId] = useState(null);
   const [previewAsset, setPreviewAsset] = useState(null);
-  const [videoPlaying, setVideoPlaying] = useState({});
 
   const assets = [
     {
@@ -55,28 +54,6 @@ export default function PromoAssetsTab() {
       desc: "アンビエント＆テクノの世界観を強調した別バリエーションの公式フライヤー。"
     },
     {
-      id: "video_ig_stories",
-      category: "video",
-      title: "Instagramストーリーズ用 プロモ動画",
-      subtitle: "縦型 9:16 / サウンド付きショートPV",
-      path: "/promo/7th_garden_ig_promo.mp4",
-      format: "MP4 (約4MB) / 9:16",
-      tag: "Stories / Reels",
-      tagColor: "neon-purple",
-      desc: "Instagram StoriesやReels、TikTokにそのままアップロードできる縦型プロモーション動画。"
-    },
-    {
-      id: "video_techno_pv",
-      category: "video",
-      title: "テクノPV プロモーション映像",
-      subtitle: "横型 16:9 / フル尺ティザームービー",
-      path: "/promo/7th_garden_techno_v2.mp4",
-      format: "MP4 (約13MB) / 16:9",
-      tag: "PV / YouTube",
-      tagColor: "neon-purple",
-      desc: "会場の大型モニター投影やYouTube、Xの動画ツイートに最適なフルクオリティPV。"
-    },
-    {
       id: "pdf_paypay_pop",
       category: "pdf",
       title: "会場卓上設置用 PayPay POP (PDF)",
@@ -118,22 +95,18 @@ export default function PromoAssetsTab() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const toggleVideo = (id) => {
-    setVideoPlaying((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
   return (
     <div className="space-y-6">
       {/* イントロバナー */}
       <div className="glass-panel p-4 rounded-2xl border border-neon-cyan/30 space-y-2">
         <div className="flex items-center gap-2">
           <div className="p-2 bg-neon-cyan/15 rounded-xl text-neon-cyan">
-            <Film className="w-5 h-5" />
+            <ImageIcon className="w-5 h-5" />
           </div>
           <div>
             <h3 className="text-sm font-extrabold text-white">公式プロモーション素材ギャラリー</h3>
             <p className="text-[10px] text-gray-400 font-mono">
-              フライヤー・プロモ動画・会場POP・QRコードのダウンロードとプレビュー
+              フライヤー・会場POP・QRコードのダウンロードとプレビュー
             </p>
           </div>
         </div>
@@ -145,7 +118,6 @@ export default function PromoAssetsTab() {
       {/* アセットグリッド */}
       <div className="space-y-4">
         {assets.map((item) => {
-          const isVideo = item.category === "video";
           const isPdf = item.category === "pdf";
 
           return (
@@ -179,17 +151,7 @@ export default function PromoAssetsTab() {
 
               {/* メディアプレビュー領域 */}
               <div className="rounded-xl overflow-hidden bg-black/40 border border-dark-border/80 flex items-center justify-center relative min-h-[160px]">
-                {isVideo ? (
-                  <div className="w-full relative flex flex-col items-center">
-                    <video
-                      id={`video_${item.id}`}
-                      src={item.path}
-                      className="max-h-64 w-auto rounded-lg object-contain"
-                      controls
-                      preload="metadata"
-                    />
-                  </div>
-                ) : isPdf ? (
+                {isPdf ? (
                   <div className="py-8 px-4 text-center space-y-2">
                     <FileText className="w-12 h-12 text-neon-yellow mx-auto opacity-80" />
                     <p className="text-xs font-mono font-bold text-white">A4 印刷用 PDF ドキュメント</p>
