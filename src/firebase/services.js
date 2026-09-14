@@ -177,13 +177,22 @@ export async function sendTipTransaction({ userId, userProfile, artistId, amount
 }
 
 /**
- * アーティスト一覧の取得（常に最新の `INITIAL_ARTISTS` を優先）
+/**
+ * アーティスト一覧の取得（保存されたカスタム一覧があればそれを優先、なければ INITIAL_ARTISTS）
  */
 export async function fetchArtistsList() {
-  localStorage.setItem("party_artists", JSON.stringify(INITIAL_ARTISTS));
+  const customArtistsRaw = localStorage.getItem("party_artists_custom");
+  let baseArtists = INITIAL_ARTISTS;
+  if (customArtistsRaw) {
+    try {
+      baseArtists = JSON.parse(customArtistsRaw);
+    } catch (e) {
+      baseArtists = INITIAL_ARTISTS;
+    }
+  }
 
   if (!isConfigured || !db) {
-    return INITIAL_ARTISTS;
+    return baseArtists;
   }
 
   try {
@@ -197,7 +206,7 @@ export async function fetchArtistsList() {
       };
     });
 
-    const mergedArtists = INITIAL_ARTISTS.map(artist => {
+    const mergedArtists = baseArtists.map(artist => {
       const liveData = pointsMap[artist.id];
       return {
         ...artist,
@@ -209,7 +218,26 @@ export async function fetchArtistsList() {
     return mergedArtists;
   } catch (error) {
     console.error("Error fetching artists from Firestore:", error);
-    return INITIAL_ARTISTS;
+    return baseArtists;
+  }
+}
+
+/**
+ * アーティスト一覧の保存（更新マネジメント用）
+ */
+export async function saveArtistsList(artists) {
+  try {
+    localStorage.setItem("party_artists_custom", JSON.stringify(artists));
+    if (isConfigured && db) {
+      for (const artist of artists) {
+        const artistRef = doc(db, "artists", artist.id);
+        await setDoc(artistRef, artist, { merge: true }).catch(() => {});
+      }
+    }
+    return { success: true };
+  } catch (e) {
+    console.error("Error saving artists list:", e);
+    return { success: false, error: e };
   }
 }
 
@@ -235,3 +263,131 @@ export async function fetchRecentTips() {
     return INITIAL_TIPS;
   }
 }
+
+/**
+ * 登録ユーザー一覧の取得（サポート・告知メール用）
+ */
+export async function fetchRegisteredUsers() {
+  const usersMap = new Map();
+
+  // 1. デモ／初期登録ユーザー
+  const defaultSampleUsers = [
+    {
+      uid: "user_sample_kenji",
+      displayName: "Kenji @ Techno Floor",
+      email: "kenji.techno.osaka@gmail.com",
+      points: 1200,
+      memberId: "7TH-K3NJ10",
+      createdAt: "2026-09-01T10:15:00Z",
+      role: "VIP Member"
+    },
+    {
+      uid: "user_sample_yuki",
+      displayName: "Yuki Ambient",
+      email: "yuki.ambient.sound@gmail.com",
+      points: 800,
+      memberId: "7TH-YUK188",
+      createdAt: "2026-09-03T14:30:00Z",
+      role: "Regular"
+    },
+    {
+      uid: "user_sample_tatsu",
+      displayName: "Tatsuya Beats",
+      email: "tatsu.beatbox.jp@gmail.com",
+      points: 1500,
+      memberId: "7TH-TATSU9",
+      createdAt: "2026-09-05T19:20:00Z",
+      role: "VIP Member"
+    },
+    {
+      uid: "user_sample_rina",
+      displayName: "Rina SoundLover",
+      email: "rina.sound.club@gmail.com",
+      points: 500,
+      memberId: "7TH-RINA01",
+      createdAt: "2026-09-08T12:00:00Z",
+      role: "Regular"
+    }
+  ];
+
+  defaultSampleUsers.forEach(u => usersMap.set(u.uid, u));
+
+  // 2. localStorage から登録ユーザーを収集
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith("user_")) {
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const u = JSON.parse(raw);
+          if (u && u.uid) {
+            usersMap.set(u.uid, {
+              ...u,
+              displayName: u.displayName || "GUEST PARTY GOER",
+              points: u.points ?? 500,
+              memberId: u.memberId || `7TH-${u.uid.slice(0, 6).toUpperCase()}`,
+              createdAt: u.createdAt || new Date().toISOString()
+            });
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("Error reading local user profiles:", e);
+  }
+
+  // 3. Firestore から登録ユーザーを取得 (オンライン時)
+  if (isConfigured && db) {
+    try {
+      const snapshot = await getDocs(collection(db, "users"));
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        usersMap.set(docSnap.id, {
+          uid: docSnap.id,
+          ...data,
+          displayName: data.displayName || "PARTY GOER",
+          points: data.points ?? 500,
+          memberId: data.memberId || `7TH-${docSnap.id.slice(0, 6).toUpperCase()}`,
+          createdAt: data.createdAt ? (typeof data.createdAt.toDate === "function" ? data.createdAt.toDate().toISOString() : data.createdAt) : new Date().toISOString()
+        });
+      });
+    } catch (e) {
+      console.warn("Firestore users read error or denied:", e);
+    }
+  }
+
+  return Array.from(usersMap.values());
+}
+
+/**
+ * ユーザーの保有ポイント更新（バックオフィスサポート用）
+ */
+export async function updateUserPoints(uid, newPoints) {
+  const points = Math.max(0, Number(newPoints) || 0);
+
+  // localStorage 更新
+  try {
+    const key = `user_${uid}`;
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      const u = JSON.parse(raw);
+      u.points = points;
+      localStorage.setItem(key, JSON.stringify(u));
+    }
+  } catch (e) {
+    console.warn("Error updating local user points:", e);
+  }
+
+  // Firestore 更新
+  if (isConfigured && db) {
+    try {
+      const userRef = doc(db, "users", uid);
+      await setDoc(userRef, { points }, { merge: true });
+    } catch (e) {
+      console.warn("Error updating Firestore user points:", e);
+    }
+  }
+
+  return { success: true, points };
+}
+

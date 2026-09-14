@@ -53,16 +53,18 @@ export async function loadBackOffice() {
   return local;
 }
 
-export async function saveBackOffice(state) {
-  const saved = saveLocalState(state);
+export async function saveBackOffice(patch) {
+  const current = loadLocalState() || {};
+  const nextState = { ...current, ...patch };
+  const saved = saveLocalState(nextState);
   if (isConfigured && db) {
     try {
       await setDoc(doc(db, "admin", "backoffice"), {
-        ...state,
+        ...nextState,
         updatedAt: saved.updatedAt,
         updatedAtIso: new Date().toISOString(),
         ts: serverTimestamp()
-      });
+      }, { merge: true });
     } catch (e) {
       /* 書き込み拒否は無視 (ローカルに既に保存済み) */
     }

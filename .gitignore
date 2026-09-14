@@ -24,3 +24,9 @@ dist-ssr
 *.sw?
 
 .vercel
+
+dist-check
+frames
+render_techno.py
+/7th_garden_ig_promo.mp4
+/7th_garden_techno_v2.mp4
