@@ -20,25 +20,19 @@ function createTextTexture(text, options = {}) {
   const textMetrics = tempCtx.measureText(text);
   const textWidth = textMetrics.width;
 
-  // パディングを確保し、長いテキストでも端が絶対に切れないように計算
-  const padX = 24 * dpr;
-  const padY = 12 * dpr;
+  // パディング（文字のシャドウ・フチどりが切れない最小限のゆとり）
+  const padX = 16 * dpr;
+  const padY = 10 * dpr;
   const canvasWidth = Math.ceil(textWidth + padX * 2);
-  const canvasHeight = Math.ceil(fontSize * 1.5 * dpr + padY * 2);
+  const canvasHeight = Math.ceil(fontSize * 1.4 * dpr + padY * 2);
 
   const canvas = document.createElement("canvas");
   canvas.width = canvasWidth;
   canvas.height = canvasHeight;
   const ctx = canvas.getContext("2d");
 
-  // 半透明ダークピル（枠線ではなく、写真や背景の上に重なっても確実に文字を読めるようにするバックドロップ）
-  ctx.save();
-  ctx.fillStyle = "rgba(6, 8, 14, 0.78)";
-  const radius = canvasHeight * 0.28;
-  ctx.beginPath();
-  ctx.roundRect(padX * 0.25, padY * 0.25, canvasWidth - padX * 0.5, canvasHeight - padY * 0.5, radius);
-  ctx.fill();
-  ctx.restore();
+  // 完全透明な背景（黒い座布団・バックドロップは完全撤廃）
+  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
   // フォント描画設定
   ctx.font = `${fontWeight} ${fontSize * dpr}px ${fontFamily}`;
@@ -48,16 +42,23 @@ function createTextTexture(text, options = {}) {
   const cx = canvasWidth / 2;
   const cy = canvasHeight / 2;
 
-  // 太い黒アウトライン（写真のハイライト部分と重なっても輪郭を完璧に際立たせる）
+  // ドロップシャドウ＆繊細な黒アウトライン（背景ボックスなしでも写真の上で読めるように輪郭のみ強調）
+  ctx.save();
+  ctx.shadowColor = "rgba(0, 0, 0, 0.95)";
+  ctx.shadowBlur = 10 * dpr;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 2 * dpr;
+
   ctx.lineJoin = "round";
   ctx.miterLimit = 2;
-  ctx.strokeStyle = "rgba(0, 0, 0, 0.95)";
-  ctx.lineWidth = 6 * dpr;
+  ctx.strokeStyle = "rgba(0, 0, 0, 0.85)";
+  ctx.lineWidth = 4 * dpr;
   ctx.strokeText(text, cx, cy);
 
-  // 文字本体（純白・シルバー）
+  // 文字本体（純白・オフホワイト）
   ctx.fillStyle = textColor;
   ctx.fillText(text, cx, cy);
+  ctx.restore();
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
