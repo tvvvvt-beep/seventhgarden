@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import * as THREE from "three";
-import { Sparkles, RefreshCw, Eye, Maximize2, Layers } from "lucide-react";
+import { Sparkles, Maximize2 } from "lucide-react";
 
 export default function DynamicHero3D({ 
   frontImage = "/hero-banner.jpg", 
@@ -9,241 +9,242 @@ export default function DynamicHero3D({
   entranceFee = "Charge Free"
 }) {
   const mountRef = useRef(null);
-  const [currentFace, setCurrentFace] = useState("front"); // 'front' | 'back'
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  // 回転ターゲット (0: front, Math.PI: back)
-  const targetRotationY = useRef(0);
-  const currentRotationY = useRef(0);
-  const tiltTarget = useRef({ x: 0, y: 0 });
-  const tiltCurrent = useRef({ x: 0, y: 0 });
-  const isDragging = useRef(false);
-  const previousMousePosition = useRef({ x: 0, y: 0 });
   const isIntersecting = useRef(true);
-
-  // フリップ切り替え関数
-  const toggleFlip = () => {
-    if (targetRotationY.current === 0) {
-      targetRotationY.current = Math.PI;
-      setCurrentFace("back");
-    } else {
-      targetRotationY.current = 0;
-      setCurrentFace("front");
-    }
-  };
+  const mousePos = useRef({ x: 0, y: 0 });
+  const targetMouse = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
 
     let width = container.clientWidth || 360;
-    let height = container.clientHeight || 280;
+    let height = container.clientHeight || 460;
 
     // 1. Scene & Camera
     const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x06070d, 0.12);
+
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-    camera.position.z = 5.2;
+    camera.position.set(0, 0, 5.8);
 
     // 2. Renderer
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
+    const renderer = new THREE.WebGLRenderer({ 
+      alpha: true, 
+      antialias: true, 
+      powerPreference: "high-performance" 
+    });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     container.appendChild(renderer.domElement);
 
-    // 3. Card Container Group
-    const cardGroup = new THREE.Group();
-    scene.add(cardGroup);
-
-    // 4. Textures Loading
+    // 3. Textures
     const textureLoader = new THREE.TextureLoader();
 
-    // Front: メインバナー (横長)
-    const frontTex = textureLoader.load(frontImage, () => {
-      setIsLoaded(true);
-    });
-    frontTex.colorSpace = THREE.SRGBColorSpace;
+    // 縦型公式フライヤー (576 x 1024 -> aspect: 0.5625)
+    // 縦横比を厳密に保つ: 幅 2.25, 高さ 4.0
+    const flyerTex = textureLoader.load(backImage);
+    flyerTex.colorSpace = THREE.SRGBColorSpace;
+    flyerTex.generateMipmaps = true;
+    flyerTex.minFilter = THREE.LinearMipmapLinearFilter;
 
-    // Back: 公式ポスター (縦型) - 裏面用に左右反転補正
-    const backTex = textureLoader.load(backImage);
-    backTex.colorSpace = THREE.SRGBColorSpace;
-    backTex.wrapS = THREE.RepeatWrapping;
-    backTex.repeat.x = -1; // Y軸180度回転時に正しい向きで読めるように反転
+    // 横長メインバナー (1024 x 434 -> aspect: 2.359)
+    // 縦横比を厳密に保つ: 幅 4.8, 高さ 2.035
+    const bannerTex = textureLoader.load(frontImage);
+    bannerTex.colorSpace = THREE.SRGBColorSpace;
+    bannerTex.generateMipmaps = true;
+    bannerTex.minFilter = THREE.LinearMipmapLinearFilter;
 
-    // 5. Materials & Card Meshes
-    // 厚みのあるスタイリッシュな3Dカード
-    const cardWidth = 3.6;
-    const cardHeight = 2.4;
-    const cardThickness = 0.06;
+    // 4. メイングループ
+    const mainGroup = new THREE.Group();
+    scene.add(mainGroup);
 
-    const frontMaterial = new THREE.MeshPhysicalMaterial({
-      map: frontTex,
-      roughness: 0.25,
+    // --- (A) 縦型公式フライヤー (ポスター) ---
+    // 反転なし・比率厳守 (2.25 x 4.0)
+    const flyerGeom = new THREE.PlaneGeometry(2.25, 4.0);
+    const flyerMat = new THREE.MeshPhysicalMaterial({
+      map: flyerTex,
+      transparent: true,
+      roughness: 0.2,
       metalness: 0.1,
       clearcoat: 0.8,
       clearcoatRoughness: 0.2,
-      reflectivity: 0.5,
+      reflectivity: 0.7,
+      side: THREE.FrontSide, // 正面のみ
     });
+    const flyerMesh = new THREE.Mesh(flyerGeom, flyerMat);
+    flyerMesh.position.set(0, 0, 0.3);
+    mainGroup.add(flyerMesh);
 
-    const backMaterial = new THREE.MeshPhysicalMaterial({
-      map: backTex,
-      roughness: 0.25,
-      metalness: 0.1,
-      clearcoat: 0.8,
-      clearcoatRoughness: 0.2,
-      reflectivity: 0.5,
-    });
-
-    const edgeMaterial = new THREE.MeshStandardMaterial({
-      color: 0x1a1d2e,
-      metalness: 0.8,
-      roughness: 0.3,
-      emissive: 0x220538,
-      emissiveIntensity: 0.4,
-    });
-
-    // Boxの各面 [右, 左, 上, 下, 前, 後]
-    const materials = [
-      edgeMaterial, // right
-      edgeMaterial, // left
-      edgeMaterial, // top
-      edgeMaterial, // bottom
-      frontMaterial, // front
-      backMaterial  // back
-    ];
-
-    const cardGeometry = new THREE.BoxGeometry(cardWidth, cardHeight, cardThickness);
-    const cardMesh = new THREE.Mesh(cardGeometry, materials);
-    cardGroup.add(cardMesh);
-
-    // 6. 光るエッジ枠線 (Neon Edge)
-    const edgesGeom = new THREE.EdgesGeometry(cardGeometry);
-    const edgesMat = new THREE.LineBasicMaterial({
+    // ポスターのネオンフレーム外枠
+    const flyerEdges = new THREE.EdgesGeometry(flyerGeom);
+    const flyerEdgeMat = new THREE.LineBasicMaterial({
       color: 0xff007f,
       linewidth: 2,
       transparent: true,
-      opacity: 0.65,
+      opacity: 0.85,
     });
-    const edgeLines = new THREE.LineSegments(edgesGeom, edgesMat);
-    cardGroup.add(edgeLines);
+    const flyerFrame = new THREE.LineSegments(flyerEdges, flyerEdgeMat);
+    flyerMesh.add(flyerFrame);
 
-    // 7. サイバー・アンビエント パーティクル
-    const particleCount = 200;
-    const particleGeometry = new THREE.BufferGeometry();
-    const particlePositions = new Float32Array(particleCount * 3);
-    const particleColors = new Float32Array(particleCount * 3);
+    // --- (B) 奥に浮遊するシネマティックワイドバナー ---
+    // 比率厳守 (4.8 x 2.035)
+    const bannerGeom = new THREE.PlaneGeometry(4.8, 2.035);
+    const bannerMat = new THREE.MeshPhysicalMaterial({
+      map: bannerTex,
+      transparent: true,
+      opacity: 0.65,
+      roughness: 0.3,
+      metalness: 0.2,
+      clearcoat: 0.5,
+      side: THREE.FrontSide,
+    });
+    const bannerMesh = new THREE.Mesh(bannerGeom, bannerMat);
+    bannerMesh.position.set(0, 0.4, -1.2);
+    mainGroup.add(bannerMesh);
 
-    const palette = [
-      new THREE.Color(0xff007f), // Neon Pink
-      new THREE.Color(0x00f3ff), // Neon Cyan
-      new THREE.Color(0xa855f7), // Neon Purple
+    const bannerEdges = new THREE.EdgesGeometry(bannerGeom);
+    const bannerEdgeMat = new THREE.LineBasicMaterial({
+      color: 0x00f3ff,
+      linewidth: 1,
+      transparent: true,
+      opacity: 0.45,
+    });
+    const bannerFrame = new THREE.LineSegments(bannerEdges, bannerEdgeMat);
+    bannerMesh.add(bannerFrame);
+
+    // --- (C) サイバー・アンビエント パーティクル ---
+    const particleCount = 280;
+    const particleGeom = new THREE.BufferGeometry();
+    const particlePos = new Float32Array(particleCount * 3);
+    const particleCol = new Float32Array(particleCount * 3);
+
+    const colors = [
+      new THREE.Color(0xff007f), // Pink
+      new THREE.Color(0x00f3ff), // Cyan
+      new THREE.Color(0xa855f7), // Purple
+      new THREE.Color(0xffd700), // Gold
     ];
 
     for (let i = 0; i < particleCount; i++) {
-      particlePositions[i * 3] = (Math.random() - 0.5) * 10;
-      particlePositions[i * 3 + 1] = (Math.random() - 0.5) * 8;
-      particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 6 - 1;
+      particlePos[i * 3] = (Math.random() - 0.5) * 12;
+      particlePos[i * 3 + 1] = (Math.random() - 0.5) * 10;
+      particlePos[i * 3 + 2] = (Math.random() - 0.5) * 8 - 0.5;
 
-      const col = palette[Math.floor(Math.random() * palette.length)];
-      particleColors[i * 3] = col.r;
-      particleColors[i * 3 + 1] = col.g;
-      particleColors[i * 3 + 2] = col.b;
+      const c = colors[Math.floor(Math.random() * colors.length)];
+      particleCol[i * 3] = c.r;
+      particleCol[i * 3 + 1] = c.g;
+      particleCol[i * 3 + 2] = c.b;
     }
 
-    particleGeometry.setAttribute("position", new THREE.BufferAttribute(particlePositions, 3));
-    particleGeometry.setAttribute("color", new THREE.BufferAttribute(particleColors, 3));
+    particleGeom.setAttribute("position", new THREE.BufferAttribute(particlePos, 3));
+    particleGeom.setAttribute("color", new THREE.BufferAttribute(particleCol, 3));
 
-    const particleMaterial = new THREE.PointsMaterial({
+    const particleMat = new THREE.PointsMaterial({
       size: 0.05,
       vertexColors: true,
       transparent: true,
-      opacity: 0.75,
+      opacity: 0.8,
       blending: THREE.AdditiveBlending,
     });
-
-    const particles = new THREE.Points(particleGeometry, particleMaterial);
+    const particles = new THREE.Points(particleGeom, particleMat);
     scene.add(particles);
 
-    // 8. Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+    // --- (D) ダイナミックライティング ---
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
     scene.add(ambientLight);
 
-    const pinkLight = new THREE.PointLight(0xff007f, 3.5, 12);
-    pinkLight.position.set(3, 2, 4);
+    // 動くネオンスポットライト (ポスター表面を走る光)
+    const pinkLight = new THREE.PointLight(0xff007f, 4.0, 10);
+    pinkLight.position.set(2, 2, 2.5);
     scene.add(pinkLight);
 
-    const cyanLight = new THREE.PointLight(0x00f3ff, 3.0, 12);
-    cyanLight.position.set(-3, -2, 4);
+    const cyanLight = new THREE.PointLight(0x00f3ff, 3.5, 10);
+    cyanLight.position.set(-2, -2, 2.5);
     scene.add(cyanLight);
 
-    // 9. Interaction Handlers (Mouse & Touch)
-    const handlePointerMove = (e) => {
+    // --- (E) マウス・タッチパララックス ---
+    const handleMove = (e) => {
       const rect = container.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
-      const normX = ((clientX - rect.left) / rect.width) * 2 - 1;
-      const normY = -(((clientY - rect.top) / rect.height) * 2 - 1);
+      const x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -(((clientY - rect.top) / rect.height) * 2 - 1);
 
-      tiltTarget.current.x = THREE.MathUtils.clamp(normY * 0.35, -0.4, 0.4);
-      tiltTarget.current.y = THREE.MathUtils.clamp(normX * 0.45, -0.5, 0.5);
-
-      // ライトをカーソルに軽く連動
-      pinkLight.position.x = normX * 4 + 2;
-      pinkLight.position.y = normY * 3 + 1;
+      targetMouse.current.x = x * 0.4;
+      targetMouse.current.y = y * 0.3;
     };
 
-    const handlePointerLeave = () => {
-      tiltTarget.current.x = 0;
-      tiltTarget.current.y = 0;
+    const handleLeave = () => {
+      targetMouse.current.x = 0;
+      targetMouse.current.y = 0;
     };
 
-    container.addEventListener("mousemove", handlePointerMove);
-    container.addEventListener("touchmove", handlePointerMove, { passive: true });
-    container.addEventListener("mouseleave", handlePointerLeave);
-    container.addEventListener("touchend", handlePointerLeave);
+    container.addEventListener("mousemove", handleMove);
+    container.addEventListener("touchmove", handleMove, { passive: true });
+    container.addEventListener("mouseleave", handleLeave);
+    container.addEventListener("touchend", handleLeave);
 
-    // 10. Animation Loop
-    let animationFrameId;
-    let clock = new THREE.Clock();
+    // --- (F) アニメーションループ (動画的な自動シネマティックモーション) ---
+    let animId;
+    const clock = new THREE.Clock();
 
     const animate = () => {
       if (isIntersecting.current) {
-        const elapsedTime = clock.getElapsedTime();
+        const t = clock.getElapsedTime();
 
-        // フリップ回転 (スムーズなLerp補間)
-        currentRotationY.current = THREE.MathUtils.lerp(
-          currentRotationY.current,
-          targetRotationY.current,
-          0.09
-        );
+        // 1. マウスパララックスのイージング
+        mousePos.current.x = THREE.MathUtils.lerp(mousePos.current.x, targetMouse.current.x, 0.05);
+        mousePos.current.y = THREE.MathUtils.lerp(mousePos.current.y, targetMouse.current.y, 0.05);
 
-        // チルト回転 (マウス追従)
-        tiltCurrent.current.x = THREE.MathUtils.lerp(tiltCurrent.current.x, tiltTarget.current.x, 0.08);
-        tiltCurrent.current.y = THREE.MathUtils.lerp(tiltCurrent.current.y, tiltTarget.current.y, 0.08);
+        // 2. 自動シネマティックカメラワーク（動画のように優雅に動く）
+        // 周期的な緩やかなパン＆ズーム
+        const camWaveX = Math.sin(t * 0.4) * 0.35 + mousePos.current.x * 0.8;
+        const camWaveY = Math.cos(t * 0.35) * 0.25 + mousePos.current.y * 0.8;
+        const camZoom = 5.8 + Math.sin(t * 0.25) * 0.35; // じわっとズームイン・アウト
 
-        // 浮遊アニメーション
-        const floatOffset = Math.sin(elapsedTime * 1.5) * 0.06;
-        cardGroup.position.y = floatOffset;
+        camera.position.x = camWaveX;
+        camera.position.y = camWaveY;
+        camera.position.z = camZoom;
+        camera.lookAt(0, 0, 0);
 
-        // カードの最終角度合成
-        cardGroup.rotation.x = tiltCurrent.current.x;
-        cardGroup.rotation.y = currentRotationY.current + tiltCurrent.current.y;
+        // 3. 縦型公式フライヤーの動画的モーション (呼吸・浮遊・傾き)
+        // アスペクト比を維持したまま、3D空間で優雅に浮遊
+        flyerMesh.position.y = Math.sin(t * 0.8) * 0.08;
+        flyerMesh.position.x = Math.cos(t * 0.5) * 0.05;
+        flyerMesh.rotation.y = Math.sin(t * 0.4) * 0.12 + mousePos.current.x * 0.25;
+        flyerMesh.rotation.x = -Math.cos(t * 0.5) * 0.08 - mousePos.current.y * 0.25;
+        flyerMesh.rotation.z = Math.sin(t * 0.3) * 0.02;
 
-        // パーティクルの緩やかな自転
-        particles.rotation.y = elapsedTime * 0.03;
-        particles.rotation.x = Math.sin(elapsedTime * 0.02) * 0.05;
+        // 4. 奥の横長バナーのパララックスモーション
+        bannerMesh.position.y = 0.4 - Math.sin(t * 0.6) * 0.1;
+        bannerMesh.position.x = -Math.cos(t * 0.4) * 0.15;
+        bannerMesh.rotation.y = -Math.sin(t * 0.3) * 0.08;
+        // 周期的にバナーの存在感が呼吸のように変化
+        bannerMat.opacity = 0.5 + Math.sin(t * 0.5) * 0.25;
 
-        // エッジ光の脈動
-        edgesMat.opacity = 0.5 + Math.sin(elapsedTime * 3) * 0.25;
+        // 5. ネオンスポットライトのシネマティックスイープ (ポスター上を走る光)
+        pinkLight.position.x = Math.sin(t * 0.9) * 3.5;
+        pinkLight.position.y = Math.cos(t * 0.7) * 3.0;
+        cyanLight.position.x = -Math.cos(t * 0.8) * 3.5;
+        cyanLight.position.y = -Math.sin(t * 0.6) * 3.0;
+
+        // 6. パーティクル空間の緩やかな回転
+        particles.rotation.y = t * 0.04;
+        particles.rotation.x = Math.sin(t * 0.03) * 0.06;
+
+        // 7. エッジフレームのネオンパルス
+        flyerEdgeMat.opacity = 0.6 + Math.sin(t * 2.5) * 0.35;
+        bannerEdgeMat.opacity = 0.35 + Math.cos(t * 2.0) * 0.2;
 
         renderer.render(scene, camera);
       }
-      animationFrameId = requestAnimationFrame(animate);
+      animId = requestAnimationFrame(animate);
     };
     animate();
 
-    // 11. Resize Observer
+    // Resize
     const handleResize = () => {
       if (!container) return;
       width = container.clientWidth;
@@ -252,103 +253,94 @@ export default function DynamicHero3D({
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
     };
-
     window.addEventListener("resize", handleResize);
 
-    // 12. Intersection Observer (スクロールで見えなくなったら描画一時停止)
+    // Intersection
     const observer = new IntersectionObserver(([entry]) => {
       isIntersecting.current = entry.isIntersecting;
     });
     observer.observe(container);
 
-    // Cleanup
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      cancelAnimationFrame(animId);
       observer.disconnect();
       window.removeEventListener("resize", handleResize);
-      container.removeEventListener("mousemove", handlePointerMove);
-      container.removeEventListener("touchmove", handlePointerMove);
-      container.removeEventListener("mouseleave", handlePointerLeave);
-      container.removeEventListener("touchend", handlePointerLeave);
+      container.removeEventListener("mousemove", handleMove);
+      container.removeEventListener("touchmove", handleMove);
+      container.removeEventListener("mouseleave", handleLeave);
+      container.removeEventListener("touchend", handleLeave);
 
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
 
-      cardGeometry.dispose();
-      edgesGeom.dispose();
-      particleGeometry.dispose();
-      frontMaterial.dispose();
-      backMaterial.dispose();
-      edgeMaterial.dispose();
-      edgesMat.dispose();
-      particleMaterial.dispose();
-      frontTex.dispose();
-      backTex.dispose();
+      flyerGeom.dispose();
+      bannerGeom.dispose();
+      flyerEdges.dispose();
+      bannerEdges.dispose();
+      particleGeom.dispose();
+      flyerMat.dispose();
+      bannerMat.dispose();
+      flyerEdgeMat.dispose();
+      bannerEdgeMat.dispose();
+      particleMat.dispose();
+      flyerTex.dispose();
+      bannerTex.dispose();
       renderer.dispose();
     };
   }, [frontImage, backImage]);
 
   return (
-    <div className="relative w-full rounded-3xl overflow-hidden glass-panel-glow border border-neon-pink/50 shadow-2xl bg-black/80 select-none">
-      {/* Three.js Canvas Container */}
+    <div className="relative w-full rounded-3xl overflow-hidden glass-panel-glow border border-neon-pink/50 shadow-2xl bg-[#06070d] select-none">
+      {/* 3D Motion Canvas (縦長ポスターがすっぽり収まる高さ) */}
       <div 
         ref={mountRef} 
-        className="w-full h-72 sm:h-80 cursor-grab active:cursor-grabbing relative overflow-hidden"
-        onClick={toggleFlip}
-        title="タップで表面（バナー）と裏面（公式ポスター）を3D回転切替"
+        className="w-full h-[440px] sm:h-[490px] relative overflow-hidden cursor-pointer"
+        onClick={onOpenModal}
+        title="タップで公式ポスターを高解像度拡大表示"
       />
 
-      {/* Top Overlay Badges */}
-      <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5 pointer-events-none">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-black/75 backdrop-blur-md border border-neon-pink/70 text-neon-pink font-mono text-[10px] font-extrabold tracking-widest rounded-full shadow-neon-pink">
+      {/* Top Left Status Badge */}
+      <div className="absolute top-3.5 left-3.5 z-10 flex items-center gap-1.5 pointer-events-none">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-black/80 backdrop-blur-md border border-neon-pink/70 text-neon-pink font-mono text-[10px] font-extrabold tracking-widest rounded-full shadow-neon-pink">
           <Sparkles className="w-3 h-3 text-neon-pink animate-pulse" />
-          <span>3D INTERACTIVE</span>
+          <span>7TH GARDEN 3D MOTION</span>
         </span>
         <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-neon-cyan/20 backdrop-blur-md border border-neon-cyan/60 text-neon-cyan font-mono text-[10px] font-extrabold tracking-widest rounded-full">
           {entranceFee}
         </span>
       </div>
 
-      {/* Top Right Current Mode Indicator */}
-      <div className="absolute top-3 right-3 z-10">
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-black/70 backdrop-blur-md border border-white/20 text-gray-200 font-mono text-[9px] font-bold rounded-full">
-          <Layers className="w-2.5 h-2.5 text-neon-cyan" />
-          <span>{currentFace === "front" ? "MAIN BANNER" : "OFFICIAL POSTER"}</span>
+      {/* Top Right Live Cinema Indicator */}
+      <div className="absolute top-3.5 right-3.5 z-10 pointer-events-none">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-black/75 backdrop-blur-md border border-red-500/50 text-red-400 font-mono text-[9px] font-bold rounded-full">
+          <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-ping" />
+          <span>AUTOPLAY 3D</span>
         </span>
       </div>
 
-      {/* Bottom Controls Bar */}
-      <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between gap-2 pointer-events-auto">
-        {/* Flip Toggle Button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleFlip();
-          }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/70 hover:bg-neon-pink/20 backdrop-blur-md border border-neon-pink/50 text-white font-mono text-[11px] font-bold shadow-lg transition-all active:scale-95 group"
-        >
-          <RefreshCw className="w-3.5 h-3.5 text-neon-pink group-hover:rotate-180 transition-transform duration-500" />
-          <span>{currentFace === "front" ? "ポスター面へ回転 ↻" : "メインバナーへ戻す ↺"}</span>
-        </button>
+      {/* Bottom Bar Controls */}
+      <div className="absolute bottom-3.5 left-3.5 right-3.5 z-10 flex items-center justify-between gap-2 pointer-events-auto">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-mono text-gray-300 bg-black/70 backdrop-blur-md border border-white/10 px-2.5 py-1.5 rounded-xl flex items-center gap-1">
+            <span className="text-neon-cyan font-bold">09/17</span>
+            <span>@ Compufunk Records</span>
+          </span>
+        </div>
 
-        {/* Modal Enlarge Button */}
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenModal && onOpenModal();
-          }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neon-cyan/20 hover:bg-neon-cyan/30 backdrop-blur-md border border-neon-cyan/60 text-neon-cyan font-mono text-[11px] font-bold shadow-lg transition-all active:scale-95"
+          onClick={onOpenModal}
+          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-neon-pink/80 to-neon-purple/80 hover:from-neon-pink hover:to-neon-purple backdrop-blur-md border border-neon-pink/60 text-white font-mono text-[11px] font-bold shadow-neon-pink transition-all active:scale-95"
         >
           <Maximize2 className="w-3.5 h-3.5" />
-          <span>拡大表示</span>
+          <span>ポスター拡大・保存</span>
         </button>
       </div>
 
-      {/* Hint Tooltip */}
-      <div className="absolute bottom-11 left-1/2 -translate-x-1/2 z-0 pointer-events-none text-center">
-        <span className="text-[9px] font-mono text-gray-400/80 bg-black/50 px-2 py-0.5 rounded-full">
-          マウス/タッチで3D傾き追従 ・ タップで回転
+      {/* Bottom Subtle Guide */}
+      <div className="absolute bottom-11 left-1/2 -translate-x-1/2 z-0 pointer-events-none text-center opacity-70">
+        <span className="text-[9px] font-mono text-gray-400 bg-black/50 px-2.5 py-0.5 rounded-full">
+          タップでポスター全画面表示 ・ マウス/タッチで視差連動
         </span>
       </div>
     </div>
