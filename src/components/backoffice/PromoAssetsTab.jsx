@@ -21,6 +21,17 @@ export default function PromoAssetsTab() {
       desc: "7th GARDEN 09/17の全出演アーティスト（山中透、Dune、tvvt、KASSIS、Sen 11、tamako、Sen & Jerry、FisH + HIWATASHI等）が網羅された最新オフィシャルフライヤー。"
     },
     {
+      id: "official_photo_0917",
+      category: "image",
+      title: "公式フライヤー 写真アートワーク単体",
+      subtitle: "切り株と林檎の象徴的メインビジュアル（文字なし写真）",
+      path: "/promo/7th_garden_0917_photo_only.jpg",
+      format: "JPG / 468x762",
+      tag: "写真素材",
+      tagColor: "neon-cyan",
+      desc: "7th GARDEN 09/17のフライヤーから文字部分を除去した、切り株と林檎の写真アートワーク単体データ。SNS告知や独自デザイン素材として活用いただけます。"
+    },
+    {
       id: "flyer_hero",
       category: "image",
       title: "メインヒーローバナー",
