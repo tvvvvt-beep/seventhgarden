@@ -6,6 +6,7 @@ import RecentTipsFeed from "../components/RecentTipsFeed";
 import DynamicHero3D from "../components/DynamicHero3D";
 
 export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist, setActiveTab, setActiveEventTab }) {
+  const photoOnlyUrl = "/promo/7th_garden_0917_photo_only.jpg";
   const heroImageUrl = "/hero-banner.jpg";
   const officialFlyerUrl = "/promo/7th_garden_0917_flyer.jpg";
   const [showFlyerModal, setShowFlyerModal] = useState(false);
@@ -15,8 +16,8 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
       {/* 3D Interactive Hero Canvas (Three.js) */}
       <div className="w-full">
         <DynamicHero3D
-          frontImage={heroImageUrl}
-          backImage={officialFlyerUrl}
+          photoImage={photoOnlyUrl}
+          bannerImage={heroImageUrl}
           onOpenModal={() => setShowFlyerModal(true)}
           entranceFee={EVENT_INFO.entranceFee}
         />

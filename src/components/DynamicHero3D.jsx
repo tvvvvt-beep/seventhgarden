@@ -3,8 +3,8 @@ import * as THREE from "three";
 import { Sparkles, Maximize2 } from "lucide-react";
 
 export default function DynamicHero3D({ 
-  frontImage = "/hero-banner.jpg", 
-  backImage = "/promo/7th_garden_0917_flyer.jpg", 
+  photoImage = "/promo/7th_garden_0917_photo_only.jpg", 
+  bannerImage = "/hero-banner.jpg", 
   onOpenModal,
   entranceFee = "Charge Free"
 }) {
@@ -41,16 +41,16 @@ export default function DynamicHero3D({
     // 3. Textures
     const textureLoader = new THREE.TextureLoader();
 
-    // 縦型公式フライヤー (576 x 1024 -> aspect: 0.5625)
-    // 縦横比を厳密に保つ: 幅 2.25, 高さ 4.0
-    const flyerTex = textureLoader.load(backImage);
-    flyerTex.colorSpace = THREE.SRGBColorSpace;
-    flyerTex.generateMipmaps = true;
-    flyerTex.minFilter = THREE.LinearMipmapLinearFilter;
+    // 写真アートワーク単体 (468 x 762 -> aspect: 0.61417)
+    // 縦横比率厳守: 幅 2.456, 高さ 4.0
+    const photoTex = textureLoader.load(photoImage);
+    photoTex.colorSpace = THREE.SRGBColorSpace;
+    photoTex.generateMipmaps = true;
+    photoTex.minFilter = THREE.LinearMipmapLinearFilter;
 
     // 横長メインバナー (1024 x 434 -> aspect: 2.359)
-    // 縦横比を厳密に保つ: 幅 4.8, 高さ 2.035
-    const bannerTex = textureLoader.load(frontImage);
+    // 縦横比率厳守: 幅 4.8, 高さ 2.035
+    const bannerTex = textureLoader.load(bannerImage);
     bannerTex.colorSpace = THREE.SRGBColorSpace;
     bannerTex.generateMipmaps = true;
     bannerTex.minFilter = THREE.LinearMipmapLinearFilter;
@@ -59,33 +59,33 @@ export default function DynamicHero3D({
     const mainGroup = new THREE.Group();
     scene.add(mainGroup);
 
-    // --- (A) 縦型公式フライヤー (ポスター) ---
-    // 反転なし・比率厳守 (2.25 x 4.0)
-    const flyerGeom = new THREE.PlaneGeometry(2.25, 4.0);
-    const flyerMat = new THREE.MeshPhysicalMaterial({
-      map: flyerTex,
+    // --- (A) 写真アートワークメッシュ (切り株と林檎) ---
+    // 反転なし・比率厳守 (2.456 x 4.0)
+    const photoGeom = new THREE.PlaneGeometry(2.456, 4.0);
+    const photoMat = new THREE.MeshPhysicalMaterial({
+      map: photoTex,
       transparent: true,
-      roughness: 0.2,
+      roughness: 0.22,
       metalness: 0.1,
-      clearcoat: 0.8,
-      clearcoatRoughness: 0.2,
-      reflectivity: 0.7,
-      side: THREE.FrontSide, // 正面のみ
+      clearcoat: 0.85,
+      clearcoatRoughness: 0.15,
+      reflectivity: 0.75,
+      side: THREE.FrontSide, // 正面のみ (反転なし)
     });
-    const flyerMesh = new THREE.Mesh(flyerGeom, flyerMat);
-    flyerMesh.position.set(0, 0, 0.3);
-    mainGroup.add(flyerMesh);
+    const photoMesh = new THREE.Mesh(photoGeom, photoMat);
+    photoMesh.position.set(0, 0, 0.35);
+    mainGroup.add(photoMesh);
 
-    // ポスターのネオンフレーム外枠
-    const flyerEdges = new THREE.EdgesGeometry(flyerGeom);
-    const flyerEdgeMat = new THREE.LineBasicMaterial({
+    // 写真フレームの外枠ネオンライン
+    const photoEdges = new THREE.EdgesGeometry(photoGeom);
+    const photoEdgeMat = new THREE.LineBasicMaterial({
       color: 0xff007f,
       linewidth: 2,
       transparent: true,
       opacity: 0.85,
     });
-    const flyerFrame = new THREE.LineSegments(flyerEdges, flyerEdgeMat);
-    flyerMesh.add(flyerFrame);
+    const photoFrame = new THREE.LineSegments(photoEdges, photoEdgeMat);
+    photoMesh.add(photoFrame);
 
     // --- (B) 奥に浮遊するシネマティックワイドバナー ---
     // 比率厳守 (4.8 x 2.035)
@@ -209,13 +209,13 @@ export default function DynamicHero3D({
         camera.position.z = camZoom;
         camera.lookAt(0, 0, 0);
 
-        // 3. 縦型公式フライヤーの動画的モーション (呼吸・浮遊・傾き)
+        // 3. 写真アートワークの動画的モーション (呼吸・浮遊・傾き)
         // アスペクト比を維持したまま、3D空間で優雅に浮遊
-        flyerMesh.position.y = Math.sin(t * 0.8) * 0.08;
-        flyerMesh.position.x = Math.cos(t * 0.5) * 0.05;
-        flyerMesh.rotation.y = Math.sin(t * 0.4) * 0.12 + mousePos.current.x * 0.25;
-        flyerMesh.rotation.x = -Math.cos(t * 0.5) * 0.08 - mousePos.current.y * 0.25;
-        flyerMesh.rotation.z = Math.sin(t * 0.3) * 0.02;
+        photoMesh.position.y = Math.sin(t * 0.8) * 0.08;
+        photoMesh.position.x = Math.cos(t * 0.5) * 0.05;
+        photoMesh.rotation.y = Math.sin(t * 0.4) * 0.12 + mousePos.current.x * 0.25;
+        photoMesh.rotation.x = -Math.cos(t * 0.5) * 0.08 - mousePos.current.y * 0.25;
+        photoMesh.rotation.z = Math.sin(t * 0.3) * 0.02;
 
         // 4. 奥の横長バナーのパララックスモーション
         bannerMesh.position.y = 0.4 - Math.sin(t * 0.6) * 0.1;
@@ -224,7 +224,7 @@ export default function DynamicHero3D({
         // 周期的にバナーの存在感が呼吸のように変化
         bannerMat.opacity = 0.5 + Math.sin(t * 0.5) * 0.25;
 
-        // 5. ネオンスポットライトのシネマティックスイープ (ポスター上を走る光)
+        // 5. ネオンスポットライトのシネマティックスイープ (アートワーク上を走る光)
         pinkLight.position.x = Math.sin(t * 0.9) * 3.5;
         pinkLight.position.y = Math.cos(t * 0.7) * 3.0;
         cyanLight.position.x = -Math.cos(t * 0.8) * 3.5;
@@ -235,7 +235,7 @@ export default function DynamicHero3D({
         particles.rotation.x = Math.sin(t * 0.03) * 0.06;
 
         // 7. エッジフレームのネオンパルス
-        flyerEdgeMat.opacity = 0.6 + Math.sin(t * 2.5) * 0.35;
+        photoEdgeMat.opacity = 0.6 + Math.sin(t * 2.5) * 0.35;
         bannerEdgeMat.opacity = 0.35 + Math.cos(t * 2.0) * 0.2;
 
         renderer.render(scene, camera);
@@ -274,21 +274,21 @@ export default function DynamicHero3D({
         container.removeChild(renderer.domElement);
       }
 
-      flyerGeom.dispose();
+      photoGeom.dispose();
       bannerGeom.dispose();
-      flyerEdges.dispose();
+      photoEdges.dispose();
       bannerEdges.dispose();
       particleGeom.dispose();
-      flyerMat.dispose();
+      photoMat.dispose();
       bannerMat.dispose();
-      flyerEdgeMat.dispose();
+      photoEdgeMat.dispose();
       bannerEdgeMat.dispose();
       particleMat.dispose();
-      flyerTex.dispose();
+      photoTex.dispose();
       bannerTex.dispose();
       renderer.dispose();
     };
-  }, [frontImage, backImage]);
+  }, [photoImage, bannerImage]);
 
   return (
     <div className="relative w-full rounded-3xl overflow-hidden glass-panel-glow border border-neon-pink/50 shadow-2xl bg-[#06070d] select-none">
