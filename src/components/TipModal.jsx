@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/useAuth";
 import { sendTipTransaction } from "../firebase/services";
-import { Heart, CheckCircle2, AlertCircle, X, Send, Info, Copy, Check, Coins, PartyPopper, Users } from "lucide-react";
+import { Heart, CheckCircle2, AlertCircle, X, Send, Info, Copy, Check, Coins, PartyPopper, Users, ExternalLink } from "lucide-react";
 import confetti from "canvas-confetti";
+
+export const PAYPAY_TRANSFER_URL = "https://qr.paypay.ne.jp/p2p01_PRYRSpRaMYAWkg07";
 
 export default function TipModal({ artist, initialMode = "paypay", onClose, onSuccess, onNavigateToLineup }) {
   const { currentUser, userProfile, setUserProfile } = useAuth();
@@ -178,13 +180,32 @@ export default function TipModal({ artist, initialMode = "paypay", onClose, onSu
                     <Heart className="w-2.5 h-2.5 fill-white" />
                     <span>7TH GARDEN 投げ銭 QR</span>
                   </div>
-                  <img
-                    src="/paypay-qr.png"
-                    alt="PayPay 投げ銭 QRコード"
-                    className="w-full h-full object-contain pt-3"
-                  />
+                  <a
+                    href={PAYPAY_TRANSFER_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full h-full flex items-center justify-center cursor-pointer group"
+                    title="PayPayアプリを開く"
+                  >
+                    <img
+                      src="/paypay-qr.png"
+                      alt="PayPay 投げ銭 QRコード"
+                      className="w-full h-full object-contain pt-3 group-hover:scale-105 transition-transform"
+                    />
+                  </a>
                 </div>
               </div>
+
+              {/* スマホ直接送金リンク */}
+              <a
+                href={PAYPAY_TRANSFER_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-md border border-red-400/40"
+              >
+                <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                <span>📱 スマホの方はタップでPayPayを開く</span>
+              </a>
 
               {/* 乾杯・ブーストの目安目安 */}
               <div className="space-y-1.5 pt-1">
@@ -425,13 +446,32 @@ export default function TipModal({ artist, initialMode = "paypay", onClose, onSu
                         <Heart className="w-2.5 h-2.5 fill-white shrink-0" />
                         <span className="truncate">{artist.name} 宛て投げ銭</span>
                       </div>
-                      <img
-                        src="/paypay-qr.png"
-                        alt="PayPay 投げ銭 QRコード"
-                        className="w-full h-full object-contain pt-3"
-                      />
+                      <a
+                        href={PAYPAY_TRANSFER_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full h-full flex items-center justify-center cursor-pointer group"
+                        title="PayPayアプリを開く"
+                      >
+                        <img
+                          src="/paypay-qr.png"
+                          alt="PayPay 投げ銭 QRコード"
+                          className="w-full h-full object-contain pt-3 group-hover:scale-105 transition-transform"
+                        />
+                      </a>
                     </div>
                   </div>
+
+                  {/* スマホ直接送金リンク */}
+                  <a
+                    href={PAYPAY_TRANSFER_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-md border border-red-400/40"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                    <span>📱 スマホの方はタップでPayPayを開く</span>
+                  </a>
 
                   {/* 乾杯・ブーストの目安目安 */}
                   <div className="space-y-1.5 pt-1">

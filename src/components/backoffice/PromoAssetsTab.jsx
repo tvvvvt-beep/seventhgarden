@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { 
   FileText, ImageIcon, Download, Copy, Check, 
-  Eye 
+  Eye, Play, Film
 } from "lucide-react";
 
 export default function PromoAssetsTab() {
@@ -9,6 +9,17 @@ export default function PromoAssetsTab() {
   const [previewAsset, setPreviewAsset] = useState(null);
 
   const assets = [
+    {
+      id: "promo_reels_video",
+      category: "video",
+      title: "トップ 3Dニュービジュアル 公式インスタムービー (Reels / Stories)",
+      subtitle: "1080×1920 (9:16) 縦型リール用・カオススピン＆収束モーション",
+      path: "/promo/7th_garden_new_visual_reels.mp4",
+      format: "MP4 (H.264) / 1080x1920",
+      tag: "NEW 公式動画",
+      tagColor: "neon-pink",
+      desc: "トップの3Dニュービジュアル（写真アートワーク、浮遊タイポグラフィ、光粒子、カオススピン＆再集束モーション）を1080×1920で完全映像化したInstagramリール／ストーリーズ用公式プロモ動画。"
+    },
     {
       id: "official_flyer_0917",
       category: "image",
@@ -130,6 +141,7 @@ export default function PromoAssetsTab() {
       <div className="space-y-4">
         {assets.map((item) => {
           const isPdf = item.category === "pdf";
+          const isVideo = item.category === "video";
 
           return (
             <div
@@ -167,6 +179,21 @@ export default function PromoAssetsTab() {
                     <FileText className="w-12 h-12 text-neon-yellow mx-auto opacity-80" />
                     <p className="text-xs font-mono font-bold text-white">A4 印刷用 PDF ドキュメント</p>
                     <p className="text-[10px] text-gray-400">クリックしてダウンロードまたは閲覧</p>
+                  </div>
+                ) : isVideo ? (
+                  <div className="relative group w-full flex flex-col items-center justify-center bg-black/80 p-3">
+                    <video
+                      src={item.path}
+                      controls
+                      loop
+                      muted
+                      playsInline
+                      className="max-h-64 w-auto object-contain rounded-lg shadow-2xl border border-white/10"
+                    />
+                    <div className="mt-2 flex items-center gap-2 text-[10px] font-mono text-neon-pink font-bold">
+                      <Film className="w-3 h-3" />
+                      <span>Instagram Reels 1080x1920 (9:16) 推奨フォーマット</span>
+                    </div>
                   </div>
                 ) : (
                   <div className="relative group w-full flex items-center justify-center bg-black/50">
@@ -222,7 +249,7 @@ export default function PromoAssetsTab() {
         })}
       </div>
 
-      {/* 画像拡大モーダル */}
+      {/* 画像/動画拡大モーダル */}
       {previewAsset && (
         <div 
           onClick={() => setPreviewAsset(null)}
@@ -238,12 +265,23 @@ export default function PromoAssetsTab() {
                 ✕ 閉じる
               </button>
             </div>
-            <div className="rounded-2xl overflow-hidden border border-dark-border bg-black">
-              <img
-                src={previewAsset.path}
-                alt={previewAsset.title}
-                className="w-full h-auto max-h-[75vh] object-contain mx-auto"
-              />
+            <div className="rounded-2xl overflow-hidden border border-dark-border bg-black flex items-center justify-center">
+              {previewAsset.category === "video" ? (
+                <video
+                  src={previewAsset.path}
+                  controls
+                  autoPlay
+                  loop
+                  playsInline
+                  className="w-full h-auto max-h-[75vh] object-contain mx-auto rounded-lg"
+                />
+              ) : (
+                <img
+                  src={previewAsset.path}
+                  alt={previewAsset.title}
+                  className="w-full h-auto max-h-[75vh] object-contain mx-auto"
+                />
+              )}
             </div>
             <div className="flex justify-end gap-2">
               <a

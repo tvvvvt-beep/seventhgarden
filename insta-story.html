@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1080, height=1920, initial-scale=1.0" />
+  <title>7th GARDEN — Instagram Story / Reel 1080x1920</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background-color: #06070d;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    #canvas-container {
+      width: 1080px;
+      height: 1920px;
+      position: relative;
+    }
+    canvas {
+      display: block;
+      width: 1080px;
+      height: 1920px;
+    }
+    /* Top & Bottom Cinematic Accent Bar for Instagram Safe Area */
+    .overlay-ui {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 64px 48px;
+    }
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 24px;
+      background: rgba(10, 10, 15, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      border-radius: 9999px;
+      color: #fff;
+      font-family: monospace;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      background-color: #00f5ff;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #00f5ff;
+    }
+    .bottom-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: rgba(255, 255, 255, 0.75);
+      font-family: monospace;
+      font-size: 19px;
+      letter-spacing: 0.1em;
+      border-top: 1px solid rgba(255, 255, 255, 0.18);
+      padding-top: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container">
+    <div class="overlay-ui">
+      <div class="top-bar">
+        <div class="pill-badge">
+          <span class="dot"></span>
+          <span>7TH GARDEN // VOL.3</span>
+        </div>
+        <div class="pill-badge" style="border-color: rgba(255, 0, 127, 0.45); color: #ff80bf;">
+          09/17 THU
+        </div>
+      </div>
+      <div class="bottom-bar">
+        <span>Compufunk Records & BAR (OSAKA)</span>
+        <span style="color: #ffe600; font-weight: bold;">CHARGE FREE</span>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from '/node_modules/three/build/three.module.js';
+
+    window.__READY__ = false;
+
+    const W = 1080;
+    const H = 1920;
+    const TOTAL_DURATION = 15.0; // 15秒
+
+    const container = document.getElementById('canvas-container');
+
+    // 1. Scene & Camera
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x06070d, 0.06);
+
+    // 縦型 9:16 (1080x1920) 最適化カメラ
+    const camera = new THREE.PerspectiveCamera(46, W / H, 0.1, 100);
+    camera.position.set(0, 0, 7.6);
+
+    // 2. Renderer
+    const renderer = new THREE.WebGLRenderer({
+      alpha: true,
+      antialias: true,
+      preserveDrawingBuffer: true,
+      powerPreference: "high-performance"
+    });
+    renderer.setSize(W, H);
+    renderer.setPixelRatio(1);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    container.appendChild(renderer.domElement);
+
+    // 3. Canvas Typography Generator
+    function createTextTexture(text, options = {}) {
+      const {
+        textColor = "#ffffff",
+        fontSize = 52,
+        fontWeight = "bold",
+        fontFamily = "'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+      } = options;
+
+      const dpr = 2;
+      const tempCanvas = document.createElement("canvas");
+      const tempCtx = tempCanvas.getContext("2d");
+      tempCtx.font = `${fontWeight} ${fontSize * dpr}px ${fontFamily}`;
+      const textMetrics = tempCtx.measureText(text);
+      const textWidth = textMetrics.width;
+
+      const padX = 20 * dpr;
+      const padY = 12 * dpr;
+      const canvasWidth = Math.ceil(textWidth + padX * 2);
+      const canvasHeight = Math.ceil(fontSize * 1.45 * dpr + padY * 2);
+
+      const canvas = document.createElement("canvas");
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+      const ctx = canvas.getContext("2d");
+
+      ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+      ctx.font = `${fontWeight} ${fontSize * dpr}px ${fontFamily}`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      const cx = canvasWidth / 2;
+      const cy = canvasHeight / 2;
+
+      ctx.save();
+      ctx.shadowColor = "rgba(0, 0, 0, 0.98)";
+      ctx.shadowBlur = 12 * dpr;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 3 * dpr;
+
+      ctx.lineJoin = "round";
+      ctx.miterLimit = 2;
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.9)";
+      ctx.lineWidth = 5 * dpr;
+      ctx.strokeText(text, cx, cy);
+
+      ctx.fillStyle = textColor;
+      ctx.fillText(text, cx, cy);
+      ctx.restore();
+
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.minFilter = THREE.LinearFilter;
+      tex.magFilter = THREE.LinearFilter;
+      tex.generateMipmaps = false;
+
+      return {
+        texture: tex,
+        aspect: canvasWidth / canvasHeight,
+      };
+    }
+
+    // 4. Textures Load
+    const textureLoader = new THREE.TextureLoader();
+    let loadedCount = 0;
+    const checkReady = () => {
+      loadedCount++;
+      if (loadedCount >= 2) {
+        window.__READY__ = true;
+      }
+    };
+
+    const photoTex = textureLoader.load("/promo/7th_garden_0917_photo_only.jpg", checkReady);
+    photoTex.colorSpace = THREE.SRGBColorSpace;
+    photoTex.generateMipmaps = true;
+
+    const bannerTex = textureLoader.load("/hero-banner.jpg", checkReady);
+    bannerTex.colorSpace = THREE.SRGBColorSpace;
+
+    // 5. Main 3D Group
+    const mainGroup = new THREE.Group();
+    scene.add(mainGroup);
+
+    // --- (A) 中央写真アートワーク ---
+    const photoHeight = 3.8;
+    const photoWidth = photoHeight * 0.61417; // 約 2.33
+    const photoGeom = new THREE.PlaneGeometry(photoWidth, photoHeight);
+    const photoMat = new THREE.MeshPhysicalMaterial({
+      map: photoTex,
+      transparent: true,
+      roughness: 0.2,
+      metalness: 0.05,
+      clearcoat: 0.9,
+      clearcoatRoughness: 0.15,
+      reflectivity: 0.6,
+      side: THREE.FrontSide,
+    });
+    const photoMesh = new THREE.Mesh(photoGeom, photoMat);
+    photoMesh.position.set(0, 0.05, 0.1);
+    mainGroup.add(photoMesh);
+
+    // --- (B) 奥のワイドシネマティックバナー ---
+    const bannerGeom = new THREE.PlaneGeometry(6.0, 2.54);
+    const bannerMat = new THREE.MeshPhysicalMaterial({
+      map: bannerTex,
+      transparent: true,
+      opacity: 0.38,
+      roughness: 0.5,
+      metalness: 0.1,
+      side: THREE.FrontSide,
+    });
+    const bannerMesh = new THREE.Mesh(bannerGeom, bannerMat);
+    bannerMesh.position.set(0, 0.25, -1.8);
+    mainGroup.add(bannerMesh);
+
+    // --- (C) 浮遊タイポグラフィ ---
+    const textItems = [
+      { text: "7th GARDEN", color: "#ffffff", size: 68, height: 0.50, pos: [0, 1.48, 0.70] },
+      { text: "09/17 (THU)", color: "#f8fafc", size: 52, height: 0.38, pos: [0, 1.12, 0.66] },
+      { text: "Compufunk Records & BAR", color: "#ffffff", size: 48, height: 0.36, pos: [0, 0.80, 0.63] },
+      { text: "18:00~24:00 Charge Free", color: "#e2e8f0", size: 44, height: 0.32, pos: [0, 0.48, 0.60] },
+      { text: "DJ: toru yamanaka (Dumb Type)", color: "#ffffff", size: 42, height: 0.31, pos: [0, 0.18, 0.58] },
+      { text: "Dune (U.V.)  /  tvvt", color: "#f1f5f9", size: 42, height: 0.31, pos: [0, -0.11, 0.56] },
+      { text: "KASSIS. (MOKSA.)  /  youngANDoldNEVERdie", color: "#f8fafc", size: 40, height: 0.30, pos: [0, -0.40, 0.55] },
+      { text: "Selector: Sen 11", color: "#e2e8f0", size: 38, height: 0.28, pos: [-0.75, -0.69, 0.53] },
+      { text: "CRYSTAL BOWL: tamako", color: "#f1f5f9", size: 38, height: 0.28, pos: [0.75, -0.69, 0.53] },
+      { text: "Live P.A.: Sen & Jerry", color: "#f8fafc", size: 38, height: 0.28, pos: [0, -0.98, 0.53] },
+      { text: "LIVE PAINT + VISUALS : FisH + HIWATASHI", color: "#ffffff", size: 38, height: 0.28, pos: [0, -1.27, 0.53] },
+      { text: "PLACE FOR ART AND MUSIC", color: "#cbd5e1", size: 38, height: 0.29, pos: [0, -1.56, 0.50] },
+    ];
+
+    const textMeshes = [];
+    textItems.forEach((item, index) => {
+      const { texture, aspect } = createTextTexture(item.text, {
+        textColor: item.color,
+        fontSize: item.size,
+      });
+
+      const geom = new THREE.PlaneGeometry(item.height * aspect, item.height);
+      const mat = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+      });
+
+      const mesh = new THREE.Mesh(geom, mat);
+      mesh.position.set(item.pos[0], item.pos[1], item.pos[2]);
+
+      const angle = (index / textItems.length) * Math.PI * 2;
+      const speed = 2.4 + (index % 3) * 0.8;
+      const radius = 2.0 + (index % 4) * 0.5;
+      const dir = index % 2 === 0 ? 1 : -1;
+
+      mesh.userData = {
+        homePos: new THREE.Vector3(...item.pos),
+        geometry: geom,
+        angle: angle,
+        orbitSpeed: speed * dir,
+        orbitRadius: radius,
+        spinSpeedX: ((index * 3) % 7 - 3) * 2.2,
+        spinSpeedY: ((index * 5) % 9 - 4) * 2.8,
+        spinSpeedZ: ((index * 2) % 5 - 2) * 2.0,
+        zSpread: ((index * 4) % 6 - 3) * 0.6,
+      };
+
+      mainGroup.add(mesh);
+      textMeshes.push(mesh);
+    });
+
+    // --- (D) シルバー/ホワイト微粒子 ---
+    const particleCount = 280;
+    const particleGeom = new THREE.BufferGeometry();
+    const particlePos = new Float32Array(particleCount * 3);
+    const particleCol = new Float32Array(particleCount * 3);
+
+    for (let i = 0; i < particleCount; i++) {
+      particlePos[i * 3] = (Math.random() - 0.5) * 14;
+      particlePos[i * 3 + 1] = (Math.random() - 0.5) * 16;
+      particlePos[i * 3 + 2] = (Math.random() - 0.5) * 10 - 1;
+
+      const brightness = 0.75 + Math.random() * 0.25;
+      particleCol[i * 3] = brightness;
+      particleCol[i * 3 + 1] = brightness;
+      particleCol[i * 3 + 2] = brightness;
+    }
+
+    particleGeom.setAttribute("position", new THREE.BufferAttribute(particlePos, 3));
+    particleGeom.setAttribute("color", new THREE.BufferAttribute(particleCol, 3));
+
+    const particleMat = new THREE.PointsMaterial({
+      size: 0.05,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.65,
+      blending: THREE.AdditiveBlending,
+    });
+    const particles = new THREE.Points(particleGeom, particleMat);
+    scene.add(particles);
+
+    // --- (E) ライティング ---
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.8);
+    scene.add(ambientLight);
+
+    const mainLight = new THREE.PointLight(0xffffff, 4.0, 16);
+    mainLight.position.set(3.0, 3.0, 4.0);
+    scene.add(mainLight);
+
+    const fillLight = new THREE.PointLight(0xe2e8f0, 2.5, 14);
+    fillLight.position.set(-3.0, -2.5, 3.5);
+    scene.add(fillLight);
+
+    // --- (F) 決定論的レンダリング関数 ---
+    window.renderAtTime = function(t) {
+      let chaos = 0;
+      if (t >= 4.0 && t < 5.2) {
+        const p = (t - 4.0) / 1.2;
+        chaos = p * p * (3 - 2 * p);
+      } else if (t >= 5.2 && t < 9.5) {
+        chaos = 1.0;
+      } else if (t >= 9.5 && t < 11.5) {
+        const p = 1.0 - (t - 9.5) / 2.0;
+        chaos = p * p * (3 - 2 * p);
+      } else {
+        chaos = 0;
+      }
+
+      // カメラワーク
+      const camX = Math.sin(t * 0.4) * 0.15;
+      const camY = Math.cos(t * 0.35) * 0.12;
+      const camZ = 7.6 + Math.sin(t * 0.25) * 0.25 - chaos * 0.45;
+      camera.position.set(camX, camY, camZ);
+      camera.lookAt(0, 0, 0);
+
+      // 中央写真アートワーク
+      const pulseScale = 1.0 + Math.sin(t * 1.5) * 0.025 + chaos * 0.08;
+      photoMesh.scale.set(pulseScale, pulseScale, 1);
+      photoMesh.position.y = 0.05 + Math.sin(t * 0.8) * 0.06;
+      photoMesh.rotation.y = Math.sin(t * 0.5) * 0.06;
+      photoMesh.rotation.x = -Math.cos(t * 0.5) * 0.04;
+
+      // テキスト
+      textMeshes.forEach((mesh) => {
+        const u = mesh.userData;
+        const idleOffsetX = Math.sin(t * 1.3 + u.angle) * 0.05;
+        const idleOffsetY = Math.cos(t * 1.1 + u.angle) * 0.05;
+        const idlePos = new THREE.Vector3(
+          u.homePos.x + idleOffsetX,
+          u.homePos.y + idleOffsetY,
+          u.homePos.z
+        );
+
+        const currentAngle = u.angle + t * u.orbitSpeed;
+        const currentRadius = u.orbitRadius * (1.0 + Math.sin(t * 2.2) * 0.25);
+        const spinX = Math.cos(currentAngle) * currentRadius;
+        const spinY = Math.sin(currentAngle) * currentRadius * 0.85;
+        const spinZ = u.homePos.z + Math.sin(currentAngle * 2) * 1.8 + u.zSpread;
+        const chaosPos = new THREE.Vector3(spinX, spinY, spinZ);
+
+        mesh.position.lerpVectors(idlePos, chaosPos, chaos);
+
+        if (chaos > 0.01) {
+          mesh.rotation.x = THREE.MathUtils.lerp(0, t * u.spinSpeedX, chaos);
+          mesh.rotation.y = THREE.MathUtils.lerp(0, t * u.spinSpeedY, chaos);
+          mesh.rotation.z = THREE.MathUtils.lerp(0, t * u.spinSpeedZ + currentAngle, chaos);
+        } else {
+          mesh.rotation.x = THREE.MathUtils.lerp(mesh.rotation.x, 0, 0.15);
+          mesh.rotation.y = THREE.MathUtils.lerp(mesh.rotation.y, 0, 0.15);
+          mesh.rotation.z = THREE.MathUtils.lerp(mesh.rotation.z, 0, 0.15);
+        }
+      });
+
+      // 奥のワイドバナー
+      bannerMesh.position.y = 0.35 - Math.sin(t * 0.6) * 0.08;
+      bannerMat.opacity = 0.35 + Math.sin(t * 0.5) * 0.12;
+
+      // ムービングライト
+      mainLight.position.x = Math.sin(t * 0.9) * 4.0;
+      mainLight.position.y = Math.cos(t * 0.7) * 3.5;
+
+      // パーティクル
+      particles.rotation.y = t * 0.04;
+
+      renderer.render(scene, camera);
+    };
+
+    let startTime = performance.now();
+    function loop() {
+      if (!window.__CAPTURING__) {
+        const elapsed = (performance.now() - startTime) / 1000.0;
+        window.renderAtTime(elapsed % TOTAL_DURATION);
+      }
+      requestAnimationFrame(loop);
+    }
+    loop();
+  </script>
+</body>
+</html>
