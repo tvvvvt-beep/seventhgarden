@@ -21,15 +21,26 @@ export default function PromoAssetsTab() {
       desc: "トップの3Dニュービジュアル（写真アートワーク、浮遊タイポグラフィ、光粒子、カオススピン＆再集束モーション）を1080×1920で完全映像化したInstagramリール／ストーリーズ用公式プロモ動画。"
     },
     {
+      id: "official_flyer_1112",
+      category: "image",
+      title: "公式フライヤー 11/12（最新オフィシャルポスター）",
+      subtitle: "Vol.4 IN MEMORIAM: JUAN ATKINS 全出演者掲載ポスター",
+      path: "/promo/7th_garden_1112_flyer.jpg",
+      format: "JPG / 正方形ポスター (1504x1504)",
+      tag: "最新公式ポスター",
+      tagColor: "neon-pink",
+      desc: "7th GARDEN Vol.4（2026.11.12 THU）の全出演アーティスト（toru yamanaka、DJサンドウ、Dune、オギーミール、tvvt、KASSIS.、youngANDoldNEVERdie + VJ risa）を掲載した最新オフィシャルフライヤー。"
+    },
+    {
       id: "official_flyer_0917",
       category: "image",
-      title: "公式フライヤー 09/17（最新オフィシャルポスター）",
+      title: "公式フライヤー 09/17（Vol.3）",
       subtitle: "Compufunk Records & BAR 全出演者掲載ポスター",
       path: "/promo/7th_garden_0917_flyer.jpg",
       format: "JPG / 縦型ポスター",
-      tag: "最新公式ポスター",
-      tagColor: "neon-pink",
-      desc: "7th GARDEN 09/17の全出演アーティスト（山中透、Dune、tvvt、KASSIS、Sen 11、tamako、Sen & Jerry、FisH + HIWATASHI等）が網羅された最新オフィシャルフライヤー。"
+      tag: "Vol.3アーカイブ",
+      tagColor: "neon-cyan",
+      desc: "7th GARDEN 09/17の全出演アーティスト（山中透、Dune、tvvt、KASSIS、Sen 11、tamako、Sen & Jerry、FisH + HIWATASHI等）が網羅されたオフィシャルフライヤー。"
     },
     {
       id: "official_photo_0917",

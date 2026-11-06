@@ -8,7 +8,7 @@ import DynamicHero3D from "../components/DynamicHero3D";
 export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist, setActiveTab, setActiveEventTab }) {
   const photoOnlyUrl = "/promo/7th_garden_0917_photo_only.jpg";
   const heroImageUrl = "/hero-banner.jpg";
-  const officialFlyerUrl = "/promo/7th_garden_0917_flyer.jpg";
+  const officialFlyerUrl = "/promo/7th_garden_1112_flyer.jpg";
   const [showFlyerModal, setShowFlyerModal] = useState(false);
   const isUpcomingEvent = true; // Vol.4 lineup posted — show big date headline
 
@@ -352,7 +352,7 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-neon-pink animate-pulse" />
                 <span className="text-xs font-bold text-white font-mono">
-                  7th GARDEN Vol.3 (09/17) ARCHIVE POSTER
+                  7th GARDEN Vol.4 (11/12) OFFICIAL POSTER
                 </span>
               </div>
               <button
@@ -367,7 +367,7 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
             <div className="flex-1 overflow-y-auto p-2 bg-black flex items-center justify-center">
               <img
                 src={officialFlyerUrl}
-                alt="7th GARDEN 09/17 Official Flyer"
+                alt="7th GARDEN Vol.4 11/12 Official Poster"
                 className="w-full h-auto max-h-[75vh] object-contain rounded-xl shadow-2xl"
               />
             </div>
@@ -375,7 +375,7 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
             {/* Modal Footer Actions */}
             <div className="p-3 bg-dark-surface/90 border-t border-dark-border flex items-center justify-between gap-2">
               <span className="text-[10px] font-mono text-gray-400">
-                Vol.3 アーカイブポスター (2026.09.17)
+                Vol.4 公式ポスター (2026.11.12 THU)
               </span>
               <a
                 href={officialFlyerUrl}
