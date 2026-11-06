@@ -73,7 +73,7 @@ function createTextTexture(text, options = {}) {
 }
 
 export default function DynamicHero3D({ 
-  photoImage = "/promo/7th_garden_0917_photo_only.jpg", 
+  photoImage = null, 
   bannerImage = "/hero-banner.jpg", 
   onOpenModal,
   entranceFee = "Charge Free"
@@ -121,12 +121,14 @@ export default function DynamicHero3D({
     // 3. Textures
     const textureLoader = new THREE.TextureLoader();
 
-    // 写真アートワーク単体 (468 x 762 -> aspect: 0.61417)
-    // 縦横比率厳守: 幅 2.2, 高さ 3.58
-    const photoTex = textureLoader.load(photoImage);
-    photoTex.colorSpace = THREE.SRGBColorSpace;
-    photoTex.generateMipmaps = true;
-    photoTex.minFilter = THREE.LinearMipmapLinearFilter;
+    // 写真アートワーク単体 (468 x 762 -> aspect: 0.61417) / なしでも動作
+    let photoTex = null;
+    if (photoImage) {
+      photoTex = textureLoader.load(photoImage);
+      photoTex.colorSpace = THREE.SRGBColorSpace;
+      photoTex.generateMipmaps = true;
+      photoTex.minFilter = THREE.LinearMipmapLinearFilter;
+    }
 
     // 奥の横長バナー (1024 x 434)
     const bannerTex = textureLoader.load(bannerImage);
@@ -142,7 +144,7 @@ export default function DynamicHero3D({
     const photoWidth = photoHeight * 0.61417; // 約 1.84
     const photoGeom = new THREE.PlaneGeometry(photoWidth, photoHeight);
     const photoMat = new THREE.MeshPhysicalMaterial({
-      map: photoTex,
+      map: photoTex || undefined,
       transparent: true,
       roughness: 0.25,
       metalness: 0.05,
@@ -153,7 +155,7 @@ export default function DynamicHero3D({
     });
     const photoMesh = new THREE.Mesh(photoGeom, photoMat);
     photoMesh.position.set(0, 0.0, 0.1);
-    mainGroup.add(photoMesh);
+    if (photoTex) mainGroup.add(photoMesh);
 
     // --- (B) 奥のシネマティックワイドバナー (枠線なし) ---
     const bannerGeom = new THREE.PlaneGeometry(4.4, 1.865);
@@ -172,18 +174,15 @@ export default function DynamicHero3D({
     // --- (C) 写真以外の全フライヤー要素（縦をギュッと詰めて上下の切れを解消） ---
     // 上下の安全マージンを確保し、中央に美しくスタック配置
     const textItems = [
-      { text: "7th GARDEN", color: "#ffffff", size: 48, height: 0.36, pos: [0, 1.18, 0.65] },
-      { text: "09/17 (THU)", color: "#f8fafc", size: 38, height: 0.28, pos: [0, 0.90, 0.62] },
-      { text: "Compufunk Records & BAR", color: "#ffffff", size: 38, height: 0.28, pos: [0, 0.64, 0.60] },
-      { text: "18:00~24:00 Charge Free", color: "#e2e8f0", size: 34, height: 0.25, pos: [0, 0.39, 0.58] },
-      { text: "DJ: toru yamanaka (Dumb Type)", color: "#ffffff", size: 32, height: 0.24, pos: [0, 0.15, 0.56] },
-      { text: "Dune (U.V.)  /  tvvt", color: "#f1f5f9", size: 32, height: 0.24, pos: [0, -0.08, 0.55] },
-      { text: "KASSIS. (MOKSA.)  /  youngANDoldNEVERdie", color: "#f8fafc", size: 30, height: 0.23, pos: [0, -0.31, 0.54] },
-      { text: "Selector: Sen 11", color: "#e2e8f0", size: 30, height: 0.23, pos: [-0.58, -0.54, 0.52] },
-      { text: "CRYSTAL BOWL: tamako", color: "#f1f5f9", size: 30, height: 0.23, pos: [0.58, -0.54, 0.52] },
-      { text: "Live P.A.: Sen & Jerry", color: "#f8fafc", size: 30, height: 0.23, pos: [0, -0.77, 0.52] },
-      { text: "LIVE PAINT + VISUALS : FisH + HIWATASHI", color: "#ffffff", size: 30, height: 0.23, pos: [0, -1.00, 0.52] },
-      { text: "PLACE FOR ART AND MUSIC", color: "#cbd5e1", size: 30, height: 0.24, pos: [0, -1.23, 0.5] },
+      { text: "7th GARDEN Vol.4", color: "#ffffff", size: 46, height: 0.32, pos: [0, 1.18, 0.65] },
+      { text: "IN MEMORIAM: JUAN ATKINS", color: "#e2e8f0", size: 30, height: 0.21, pos: [0, 0.94, 0.62] },
+      { text: "11/12", color: "#ffffff", size: 72, height: 0.52, pos: [0, 0.58, 0.68] },
+      { text: "(THU) 2026", color: "#f8fafc", size: 34, height: 0.24, pos: [0, 0.24, 0.60] },
+      { text: "Compufunk Records & BAR (OSAKA)", color: "#f1f5f9", size: 30, height: 0.22, pos: [0, 0.02, 0.56] },
+      { text: "Charge Free", color: "#f8fafc", size: 30, height: 0.22, pos: [0, -0.19, 0.55] },
+      { text: "DJ toru yamanaka / DJ SANDU + 6 MORE — VJ risa", color: "#e2e8f0", size: 27, height: 0.21, pos: [0, -0.40, 0.54] },
+      { text: "PAST EVENTS ARCHIVE: Vol.3 / Vol.2", color: "#f8fafc", size: 26, height: 0.20, pos: [0, -0.60, 0.52] },
+      { text: "PLACE FOR ART AND MUSIC", color: "#cbd5e1", size: 28, height: 0.22, pos: [0, -0.80, 0.5] },
     ];
 
     const textMeshes = [];
@@ -434,7 +433,7 @@ export default function DynamicHero3D({
       photoMat.dispose();
       bannerMat.dispose();
       particleMat.dispose();
-      photoTex.dispose();
+      if (photoTex) photoTex.dispose();
       bannerTex.dispose();
 
       textMeshes.forEach((mesh) => {

@@ -3,9 +3,13 @@ import ArtistCard from "../components/ArtistCard";
 import { Clock, Disc, Sparkles, History, Calendar, MapPin } from "lucide-react";
 import { PAST_EVENTS, EVENT_INFO } from "../firebase/mockData";
 
-export default function LineupPage({ artists, onOpenTipModal, onSelectArtist, activeEventTab = "vol_3", setActiveEventTab }) {
+export default function LineupPage({ artists, onOpenTipModal, onSelectArtist, activeEventTab = "vol_4", setActiveEventTab }) {
   const [currentEvent, setCurrentEvent] = useState(activeEventTab);
   const [searchQuery, setSearchQuery] = useState("");
+
+  React.useEffect(() => {
+    setCurrentEvent(activeEventTab);
+  }, [activeEventTab]);
 
   const handleTabChange = (eventId) => {
     setCurrentEvent(eventId);
@@ -14,10 +18,10 @@ export default function LineupPage({ artists, onOpenTipModal, onSelectArtist, ac
     }
   };
 
-  const isVol3 = currentEvent === "vol_3";
-  const pastEvent = PAST_EVENTS.find(e => e.id === currentEvent) || PAST_EVENTS[0];
+  const isUpcoming = currentEvent === "vol_4";
+  const pastEvent = PAST_EVENTS.find(e => e.id === currentEvent) || null;
 
-  const currentArtistsList = isVol3 ? artists : (pastEvent?.artists || []);
+  const currentArtistsList = isUpcoming ? artists : (pastEvent?.artists || []);
 
   const filteredArtists = currentArtistsList.filter((artist) => {
     const matchesSearch =
@@ -36,40 +40,43 @@ export default function LineupPage({ artists, onOpenTipModal, onSelectArtist, ac
             <span>LINEUP & ARTISTS</span>
           </h2>
           <p className="text-xs text-gray-400 font-mono">
-            {isVol3 ? "次回 09/17 出演アーティスト＆タイムテーブル" : `${pastEvent.title} アーカイブ`}
+            {isUpcoming ? "次回 11/12 (THU) 出演アーティスト＆タイムテーブル" : `${pastEvent?.title} アーカイブ`}
           </p>
         </div>
       </div>
 
       {/* Event Selection Tabs */}
-      <div className="grid grid-cols-2 gap-2 p-1.5 bg-dark-surface rounded-2xl border border-dark-border">
+      <div className={`grid gap-2 p-1.5 bg-dark-surface rounded-2xl border border-dark-border ${PAST_EVENTS.length > 1 ? "grid-cols-3" : "grid-cols-2"}`}>
         <button
-          onClick={() => handleTabChange("vol_3")}
+          onClick={() => handleTabChange("vol_4")}
           className={`flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl font-mono text-xs font-bold transition-all ${
-            isVol3
+            isUpcoming
               ? "bg-gradient-to-r from-neon-pink/80 to-neon-purple/80 text-white shadow-neon-pink"
               : "text-gray-400 hover:text-white"
           }`}
         >
           <Sparkles className="w-3.5 h-3.5" />
-          <span>Vol.3 (次回 09/17)</span>
+          <span>Vol.4 (次回 11/12)</span>
         </button>
 
-        <button
-          onClick={() => handleTabChange("vol_2")}
-          className={`flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl font-mono text-xs font-bold transition-all ${
-            !isVol3
-              ? "bg-gradient-to-r from-purple-800 to-indigo-800 text-white shadow-neon-purple border border-neon-purple/40"
-              : "text-gray-400 hover:text-white"
-          }`}
-        >
-          <History className="w-3.5 h-3.5" />
-          <span>Vol.2 (前回 07/30)</span>
-        </button>
+        {PAST_EVENTS.map((ev) => (
+          <button
+            key={ev.id}
+            onClick={() => handleTabChange(ev.id)}
+            className={`flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl font-mono text-xs font-bold transition-all ${
+              !isUpcoming && currentEvent === ev.id
+                ? "bg-gradient-to-r from-purple-800 to-indigo-800 text-white shadow-neon-purple border border-neon-purple/40"
+                : "text-gray-400 hover:text-white"
+            }`}
+          >
+            <History className="w-3.5 h-3.5" />
+            <span>{ev.vol} ({ev.date.slice(5, 10)})</span>
+          </button>
+        ))}
       </div>
 
-      {/* Archive Notice Banner (If Vol.2 Selected) */}
-      {!isVol3 && (
+      {/* Archive Notice Banner (If a past event selected) */}
+      {pastEvent && (
         <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/40 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
@@ -89,6 +96,21 @@ export default function LineupPage({ artists, onOpenTipModal, onSelectArtist, ac
               {pastEvent.openTime}
             </span>
           </div>
+        </div>
+      )}
+
+      {/* Coming Next Banner (Vol.4 lineup TBD) */}
+      {isUpcoming && currentArtistsList.length === 0 && (
+        <div className="p-5 rounded-2xl bg-gradient-to-br from-pink-950/50 via-dark-card to-purple-950/50 border border-neon-pink/40 text-center space-y-2 shadow-neon-pink">
+          <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-neon-pink/20 text-neon-pink border border-neon-pink/40 inline-block">
+            COMING NEXT
+          </span>
+          <h3 className="text-lg font-black text-white tracking-wider">7th GARDEN Vol.4</h3>
+          <span className="block text-5xl font-black leading-none bg-gradient-to-b from-white to-neon-pink bg-clip-text text-transparent">11<span className="text-neon-cyan mx-0.5">/</span>12</span>
+          <p className="text-xs font-mono text-gray-300 tracking-[0.25em] mt-1">2026 — THURSDAY @ Compufunk Records &amp; BAR (OSAKA)</p>
+          <p className="text-xs text-gray-300 leading-relaxed max-w-xs mx-auto">
+            ラインナップ・タイムテーブルは準備中です。<br />確定次第このページに反映されます。
+          </p>
         </div>
       )}
 
@@ -115,7 +137,7 @@ export default function LineupPage({ artists, onOpenTipModal, onSelectArtist, ac
       <div className="flex items-center justify-between text-xs font-mono text-gray-400 border-b border-dark-border pb-2">
         <span className="flex items-center gap-1.5 text-neon-cyan font-bold">
           <Clock className="w-3.5 h-3.5 text-neon-pink" />
-          <span>{isVol3 ? "TIMETABLE: 18:00 - 24:00 (確定)" : "VOL.2 LINEUP (全10組)"}</span>
+          <span>{isUpcoming ? "VOL.4 — 11/12 (THU) / LINEUP: 準備中" : `${pastEvent?.vol} LINEUP (全${(pastEvent?.artists || []).length}組)`}</span>
         </span>
         <span className="bg-dark-surface px-2.5 py-0.5 rounded-full border border-dark-border">{filteredArtists.length} ACTS</span>
       </div>
@@ -137,8 +159,8 @@ export default function LineupPage({ artists, onOpenTipModal, onSelectArtist, ac
           ))
         )}
 
-        {/* Closing / Buffer info slot (Only on Vol.3) */}
-        {isVol3 && !searchQuery && (
+        {/* Closing / Buffer info slot (past events only) */}
+        {!isUpcoming && !searchQuery && pastEvent?.id === "vol_3" && (
           <div className="p-3.5 rounded-2xl bg-dark-card/40 border border-dashed border-dark-border flex items-center justify-between text-xs font-mono text-gray-400">
             <div className="flex items-center gap-2">
               <Clock className="w-3.5 h-3.5 text-gray-500" />

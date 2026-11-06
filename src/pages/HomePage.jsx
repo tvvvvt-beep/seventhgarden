@@ -10,13 +10,14 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
   const heroImageUrl = "/hero-banner.jpg";
   const officialFlyerUrl = "/promo/7th_garden_0917_flyer.jpg";
   const [showFlyerModal, setShowFlyerModal] = useState(false);
+  const isUpcomingEvent = true; // Vol.4 lineup posted — show big date headline
 
   return (
     <div className="space-y-6 pb-6 animate-fadeIn max-w-full overflow-hidden">
       {/* 3D Interactive Hero Canvas (Three.js) */}
       <div className="w-full">
         <DynamicHero3D
-          photoImage={photoOnlyUrl}
+          photoImage={null}
           bannerImage={heroImageUrl}
           onOpenModal={() => setShowFlyerModal(true)}
           entranceFee={EVENT_INFO.entranceFee}
@@ -30,9 +31,19 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
           <h2 className="text-2xl font-black tracking-wider text-white bg-gradient-to-r from-white via-pink-200 to-neon-pink bg-clip-text text-transparent mb-1">
             {EVENT_INFO.title}
           </h2>
-          <p className="text-xs text-neon-cyan font-mono tracking-widest mb-3 font-bold">
+          <p className="text-xs text-neon-cyan font-mono tracking-widest mb-2 font-bold">
             {EVENT_INFO.subtitle}
           </p>
+
+          {/* Big date headline */}
+          {isUpcomingEvent && (
+          <div className="mb-4">
+            <span className="block text-5xl sm:text-6xl font-black leading-none tracking-tight bg-gradient-to-b from-white via-pink-100 to-neon-pink bg-clip-text text-transparent drop-shadow-[0_0_18px_rgba(236,72,153,0.45)]">
+              11<span className="text-neon-cyan mx-0.5">/</span>12
+            </span>
+            <span className="block text-sm font-mono font-bold text-gray-300 tracking-[0.3em] mt-1.5">2026 — THURSDAY</span>
+          </div>
+          )}
 
           <p className="text-xs text-gray-300 max-w-xs mx-auto leading-relaxed mb-5 bg-dark-card/60 backdrop-blur-sm p-3 rounded-2xl border border-white/5">
             {EVENT_INFO.description}
@@ -44,7 +55,7 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
               <Calendar className="w-4 h-4 text-neon-pink shrink-0" />
               <div>
                 <span className="text-[9px] text-gray-500 block">DATE</span>
-                <span className="text-gray-200 font-bold text-[11px]">{EVENT_INFO.date}</span>
+                <span className="text-white font-black text-base">{EVENT_INFO.date}</span>
               </div>
             </div>
 
@@ -75,13 +86,14 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
             onClick={() => setActiveTab("lineup")}
             className="w-full bg-gradient-to-r from-neon-pink via-neon-purple to-neon-cyan text-white font-extrabold text-xs py-3.5 rounded-xl shadow-neon-pink hover:opacity-95 transition-all flex items-center justify-center gap-1.5"
           >
-            <span>出演者一覧を見る</span>
+            <span>{artists.length > 0 ? "出演者一覧を見る" : "アーカイブを見る（Vol.3 / Vol.2）"}</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Single One-Click Event Support PayPay Banner */}
+      {/* Single One-Click Event Support PayPay Banner (hidden while lineup TBD) */}
+      {artists.length > 0 && (
       <div className="bg-gradient-to-r from-red-950/80 via-dark-card to-pink-950/80 border-2 border-red-500/60 p-4 rounded-3xl flex items-center justify-between gap-3 shadow-2xl relative overflow-hidden group">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-red-500 to-pink-600 flex items-center justify-center text-white shadow-lg shrink-0">
@@ -111,8 +123,10 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
           <span>PayPay QR</span>
         </button>
       </div>
+      )}
 
-      {/* Self-Realization & PayPay Support PR Section */}
+      {/* Self-Realization & PayPay Support PR Section (hidden while lineup TBD) */}
+      {artists.length > 0 && (
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -225,13 +239,14 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
           ※ PayPay送金のメッセージ（メモ）にアーティスト名を記載することで、実質的な自己実現支援金として届けられます。
         </p>
       </div>
+      )}
 
-      {/* Featured Artists Section */}
+      {/* Featured Artists Section / Coming Next placeholder */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-base font-extrabold text-white">PICKUP ARTISTS</h3>
-            <p className="text-[10px] text-gray-400 font-mono">今夜注目のDJ / VJ / LIVEラインナップ</p>
+            <h3 className="text-base font-extrabold text-white">{artists.length > 0 ? "PICKUP ARTISTS" : "NEXT EVENT"}</h3>
+            <p className="text-[10px] text-gray-400 font-mono">{artists.length > 0 ? "今夜注目のDJ / VJ / LIVEラインナップ" : "Vol.4 — 11/12 coming next"}</p>
           </div>
           <button
             onClick={() => setActiveTab("lineup")}
@@ -244,6 +259,22 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
 
         <div className="space-y-4">
           {(() => {
+            if (artists.length === 0) {
+              return (
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-pink-950/40 via-dark-card to-purple-950/40 border border-neon-pink/30 text-center space-y-2">
+                  <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-neon-pink/20 text-neon-pink border border-neon-pink/40 inline-block">
+                    COMING NEXT
+                  </span>
+                  <h4 className="text-base font-black text-white tracking-wider">7th GARDEN Vol.4</h4>
+                  <span className="block text-5xl font-black leading-none bg-gradient-to-b from-white to-neon-pink bg-clip-text text-transparent">11<span className="text-neon-cyan mx-0.5">/</span>12</span>
+                  <p className="text-[11px] font-mono text-gray-300 tracking-[0.2em] mt-1">2026 — THURSDAY @ Compufunk Records &amp; BAR (OSAKA)</p>
+                  <p className="text-[11px] text-gray-300 leading-relaxed max-w-xs mx-auto">
+                    Vol.4 のラインナップは準備中。<br />下記アーカイブからVol.3 / Vol.2 の記録を見られます。
+                  </p>
+                </div>
+              );
+            }
+
             const yamanaka = artists.find((a) => a.id === "artist_yamanaka" || a.name.toLowerCase().includes("yamanaka"));
             const sen11 = artists.find((a) => a.id === "artist_sen11" || (a.name.includes("Sen 11") && !a.name.includes("Jerry")));
             const displayList = [yamanaka, sen11].filter(Boolean);
@@ -292,7 +323,7 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
                 </span>
               </div>
               <p className="text-[10px] font-mono text-gray-400">
-                {event.date} @ {event.venue} (10 ACTS)
+                {event.date} @ {event.venue} ({(event.artists || []).length} ACTS)
               </p>
             </div>
             <div className="flex items-center gap-1 text-[11px] font-mono text-neon-purple font-bold">
@@ -321,7 +352,7 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-neon-pink animate-pulse" />
                 <span className="text-xs font-bold text-white font-mono">
-                  7th GARDEN 09/17 OFFICIAL POSTER
+                  7th GARDEN Vol.3 (09/17) ARCHIVE POSTER
                 </span>
               </div>
               <button
@@ -344,7 +375,7 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
             {/* Modal Footer Actions */}
             <div className="p-3 bg-dark-surface/90 border-t border-dark-border flex items-center justify-between gap-2">
               <span className="text-[10px] font-mono text-gray-400">
-                Compufunk Records & BAR (OSAKA)
+                Vol.3 アーカイブポスター (2026.09.17)
               </span>
               <a
                 href={officialFlyerUrl}

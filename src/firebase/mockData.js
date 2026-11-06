@@ -1,197 +1,118 @@
 export const EVENT_INFO = {
-  title: "7th GARDEN 09/17",
-  subtitle: "PLACE FOR ART AND MUSIC",
-  date: "2026.09.17 (THU)",
+  title: "7th GARDEN Vol.4",
+  subtitle: "2026.11.12 (THU) 18:00 - 24:00",
+  date: "2026.11.12 (THU)",
   openTime: "18:00 - 24:00",
-  venue: "Compufunk Records & BAR (OSAKA)",
-  description: "3回目となる7th GARDEN。トワイライトタイムに響くtamakoのクリスタルボウルを合図に、夜が動き出す。四半世紀にわたってアンビエントの現場「U.V.」を継続してきたDUNE、チュニジアから来たポエトリーアーティストSen。そして、この夜のハイライトとなるのは、ダムタイプの初期からのメンバー山中透。気鋭の女性DJ KASSIS、映像、サウンドデザイン、DJ、AIなど、ジャンルを横断し続けるtvvtも加わり、レジェンドからニューカマーまでが肩の力を抜いてトライする。高いクォリティで展開するコンテンツだが、DJとギャラリーのあいだにボーダーはなく、誰もが等価にただそこに存在し、佇むことができる「庭」——7th GARDEN、9/17。",
+  venue: "Compufunk Records & BAR SPACE (OSAKA)",
+  description: "フリーなバイブスと、ディープな音。そこに現れるクールな庭、7th GARDEN。今回はデトロイト・テクノの先駆者、ホアン・アトキンスへの追悼を込めて。レジデントが育んだこの「庭」に新たに加わるゲストや、初期ダムタイプを手がける toru yamanaka がコアを稼働させる。DJとギャラリーの境界なく、誰もが等しく、ただそこに佇める庭へ。",
   entranceFee: "Charge Free",
-  hashtag: "#7thGarden #CompuFunk #PlaceForArtAndMusic"
+  hashtag: "#7thGarden #CompuFunk #Vol4"
 };
 
 export const INITIAL_ARTISTS = [
   {
-    id: "artist_tamako",
-    name: "tamako",
-    roleLabel: "オープニング",
-    genre: "CRYSTAL BOWL / SOUND HEALING",
-    stage: "MAIN STAGE",
-    time: "18:00 - 18:15",
-    duration: "15m",
-    image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80",
-    bio: "【LIVE ACT / オープニング】クリスタルボウルの神秘的な倍音響が織りなすサウンドヒーリング。五感を満たす空間調整パフォーマンス。",
-    totalPoints: 9800,
-    likesCount: 120,
-    sns: { instagram: "tamako_crystalbowl" }
-  },
-  {
-    id: "artist_sen11",
-    name: "Selector: Sen 11",
-    roleLabel: "Selector",
-    genre: "POETRY / SELECTOR",
-    stage: "MAIN STAGE",
-    time: "18:15 - 19:00",
-    duration: "45m",
-    image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80",
-    bio: "チュニジアから来日したポエトリーのアーティスト。選曲家として、音と言葉の境界を横断する。",
-    totalPoints: 8400,
-    likesCount: 95,
-    sns: { instagram: "sen11_poetry" }
-  },
-  {
-    id: "artist_dune",
-    name: "Dune (U.V.)",
-    roleLabel: "DJ / Ambient",
-    genre: "EXPERIMENTAL / SOUNDSCAPE",
-    stage: "MAIN STAGE",
-    time: "19:00 - 19:45",
-    duration: "45m",
-    image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=600&q=80",
-    bio: "四半世紀にわたってアンビエントの現場「U.V.」を継続してきた第一人者。深遠なサウンドスケープと立体音響による空間実験を展開。",
-    totalPoints: 11200,
-    likesCount: 165,
-    sns: { instagram: "dune_uv_official" },
-    supportGoal: {
-      title: "写真家として一歩進むための良いレンズが欲しい！",
-      description: "四半世紀のDJ活動に加え、写真家としても表現の幅を広げる新たな一歩を踏み出したいと考えています。次の作品作りに向けた高品質なカメラレンズ導入を目指してPayPay投げ銭を募集中！ぜひ応援をお願いします。",
-      tag: "PHOTO / LENS",
-      targetAmount: "¥50,000",
-      memoKeyword: "DUNE"
-    }
-  },
-  {
-    id: "artist_sen_jerry",
-    name: "Live P.A.: Sen & Jerry",
-    roleLabel: "Live P.A.",
-    genre: "POETRY / LIVE P.A.",
-    stage: "MAIN STAGE",
-    time: "19:45 - 20:15",
-    duration: "30m",
-    image: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=80",
-    bio: "チュニジアから来日したポエトリーのアーティストSenとJerryによるLive P.A.ユニット。音と言葉の境界を横断する。",
-    totalPoints: 7600,
-    likesCount: 88,
-    sns: { instagram: "sen_jerry_live" }
-  },
-  {
-    id: "artist_youngandold",
-    name: "youngANDoldNEVERdie",
-    roleLabel: "DJ / Newcomer",
-    genre: "TECHNO / JAZZ",
-    stage: "MAIN STAGE",
-    time: "20:15 - 20:55",
-    duration: "40m",
-    image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80",
-    bio: "7th GARDEN初登場のニューカマー。テクノからジャズまで、ジャンルを問わず横断する選曲でフロアに新しい風を吹き込む。",
-    totalPoints: 9100,
-    likesCount: 104,
-    sns: { instagram: "youngandoldneverdie" }
-  },
-  {
-    id: "artist_yamanaka",
-    name: "toru yamanaka (Dumb Type)",
-    roleLabel: "メインアクト",
-    genre: "TECHNO / ELECTRONIC / MINIMAL",
-    stage: "MAIN STAGE",
-    time: "20:55 - 21:55",
-    duration: "60m",
-    image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80",
-    bio: "ダムタイプの初期からのメンバーとして知られる、関西シーンを代表するサウンドアーティスト。音と光が共鳴する没入型セットでフロアを魅了する。",
-    totalPoints: 16500,
-    likesCount: 210,
-    sns: { instagram: "toruyamanaka_art" }
-  },
-  {
-    id: "artist_kassis",
-    name: "KASSIS (MOKSA.)",
+    id: "v4_artist_1",
+    name: "toru yamanaka",
     roleLabel: "DJ",
-    genre: "MINIMAL TECHNO / LEFTFIELD",
+    genre: "EARLY DUMBTYPE / TECHNO",
     stage: "MAIN STAGE",
-    time: "21:55 - 22:40",
-    duration: "45m",
-    image: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=600&q=80",
-    bio: "MOKSA.名義でも活動する気鋭の女性DJ。ミニマルテクノと繊細な音響テクスチャーが織りなす上質なラウンジセット。",
-    totalPoints: 8900,
-    likesCount: 115,
-    sns: { instagram: "kassis_moksa" },
-    supportGoal: {
-      title: "福井・大阪の二重拠点化に伴う制作・活動環境の整備！",
-      description: "福井と大阪の二重拠点での活動が本格スタート！2つの拠点を往来しながら良質な音楽を届け続けるため、移動・スタジオ制作環境の整備へのPayPay投げ銭サポートを大歓迎しています！",
-      tag: "DUAL BASE / STUDIO",
-      targetAmount: "¥30,000",
-      memoKeyword: "KASSIS"
-    }
+    time: "DJ SET",
+    duration: "DJ",
+    bio: "【DJ】初期ダムタイプの音楽を手がけ、作曲家・プロデューサー・DJとして活動。「庭」のコアを稼働させる存在として、当時の音源を匂わせながらフロアをクールに加熱させる。",
+    totalPoints: 0,
+    likesCount: 0,
+    sns: {}
   },
   {
-    id: "artist_tvvt",
+    id: "v4_artist_2",
+    name: "DJサンドウ",
+    roleLabel: "DJ",
+    genre: "90s TECHNO",
+    stage: "MAIN STAGE",
+    time: "DJ SET",
+    duration: "DJ",
+    bio: "【DJ】この「庭」に新たに加わるゲスト。90年代テクノのアプローチで挑む。",
+    totalPoints: 0,
+    likesCount: 0,
+    sns: {}
+  },
+  {
+    id: "v4_artist_3",
+    name: "Dune",
+    roleLabel: "DJ",
+    genre: "U.V.",
+    stage: "MAIN STAGE",
+    time: "DJ SET",
+    duration: "DJ",
+    bio: "【DJ】U.V.所属。それぞれのスタイルで庭を彩る。",
+    totalPoints: 0,
+    likesCount: 0,
+    sns: {}
+  },
+  {
+    id: "v4_artist_4",
+    name: "オギミール",
+    roleLabel: "DJ",
+    genre: "Columbia8",
+    stage: "MAIN STAGE",
+    time: "DJ SET",
+    duration: "DJ",
+    bio: "【DJ】Columbia8所属。それぞれのスタイルで庭を彩る。",
+    totalPoints: 0,
+    likesCount: 0,
+    sns: {}
+  },
+  {
+    id: "v4_artist_5",
+    name: "KASSIS.",
+    roleLabel: "DJ",
+    genre: "MOKSA.",
+    stage: "MAIN STAGE",
+    time: "DJ SET",
+    duration: "DJ",
+    bio: "【DJ】MOKSA.所属。それぞれのスタイルで庭を彩る。",
+    totalPoints: 0,
+    likesCount: 0,
+    sns: {}
+  },
+  {
+    id: "v4_artist_6",
     name: "tvvt",
-    roleLabel: "ラストアクト",
-    genre: "DEEP HOUSE / CHILL TECHNO",
+    roleLabel: "DJ",
+    genre: "TECHNO / CHILL",
     stage: "MAIN STAGE",
-    time: "22:40 - 23:25",
-    duration: "45m",
-    image: "https://images.unsplash.com/photo-1571266028243-3716f02d2d2e?auto=format&fit=crop&w=600&q=80",
-    bio: "映像、サウンドデザイン、DJ、AIなど、ジャンルを横断し続けるクリエイター。7th Gardenのオーガナイズも手掛けながら、ディープで洗練された電子音響空間で夜を締めくくる。",
-    totalPoints: 13800,
-    likesCount: 172,
-    sns: { instagram: "tvvt_7thgarden" }
+    time: "DJ SET",
+    duration: "DJ",
+    bio: "【DJ】レジデント。それぞれのスタイルで庭を彩る。",
+    totalPoints: 0,
+    likesCount: 0,
+    sns: {}
   },
   {
-    id: "artist_fish_hiwatashi",
-    name: "FisH + HIWATASHI",
-    roleLabel: "VISUAL ACT",
-    genre: "LIVE PAINT + PROJECTION MAPPING",
-    stage: "VISUAL STAGE",
-    time: "18:00 - 24:00 (ALL NIGHT)",
-    duration: "ALL NIGHT",
-    image: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=80",
-    bio: "【SPECIAL VISUAL ACT】ライブペイントとプロジェクションマッピングを融合させるユニット。描かれていく筆致にリアルタイムで映像が重なり合う、一夜限りのデジタルアート演出。",
-    totalPoints: 14500,
-    likesCount: 185,
-    sns: { instagram: "fish_hiwatashi_art" }
-  }
-];
-
-export const INITIAL_TIPS = [
-  {
-    id: "tip_mock_1",
-    fromUserId: "user_mock_1",
-    fromUserName: "KENJI_N",
-    toArtistId: "artist_yamanaka",
-    toArtistName: "toru yamanaka (Dumb Type)",
-    amount: 500,
-    message: "山中透さんのセット圧巻でした！最高です！🔥",
-    timestamp: new Date(Date.now() - 1000 * 60 * 12).toISOString()
+    id: "v4_artist_7",
+    name: "youngANDoldNEVERdie",
+    roleLabel: "DJ",
+    genre: "SELECTOR",
+    stage: "MAIN STAGE",
+    time: "DJ SET",
+    duration: "DJ",
+    bio: "【DJ】それぞれのスタイルで庭を彩る。",
+    totalPoints: 0,
+    likesCount: 0,
+    sns: {}
   },
   {
-    id: "tip_mock_2",
-    fromUserId: "user_mock_2",
-    fromUserName: "SORA",
-    toArtistId: "artist_tamako",
-    toArtistName: "tamako",
-    amount: 300,
-    message: "クリスタルボウルの響きでオープニングから整いました✨",
-    timestamp: new Date(Date.now() - 1000 * 60 * 35).toISOString()
-  },
-  {
-    id: "tip_mock_3",
-    fromUserId: "user_mock_3",
-    fromUserName: "MEGUMI",
-    toArtistId: "artist_fish_hiwatashi",
-    toArtistName: "FisH + HIWATASHI",
-    amount: 300,
-    message: "プロジェクションマッピングとライブペイントの融合すごい！🎨",
-    timestamp: new Date(Date.now() - 1000 * 60 * 55).toISOString()
-  },
-  {
-    id: "tip_mock_4",
-    fromUserId: "user_mock_4",
-    fromUserName: "TAKASHI",
-    toArtistId: "artist_sen_jerry",
-    toArtistName: "Live P.A.: Sen & Jerry",
-    amount: 300,
-    message: "言葉と音の響きが唯一無二でした！👏",
-    timestamp: new Date(Date.now() - 1000 * 60 * 75).toISOString()
+    id: "v4_artist_8",
+    name: "risa",
+    roleLabel: "VJ",
+    genre: "VISUAL / VJ",
+    stage: "MAIN STAGE",
+    time: "VJ",
+    duration: "VJ",
+    bio: "【VJ】フロアデビュー。テクノへの熱を、繊細な映像に織り込んでいく。",
+    totalPoints: 0,
+    likesCount: 0,
+    sns: {}
   }
 ];
 
@@ -349,6 +270,221 @@ export const PAST_EVENTS = [
         sns: { instagram: "columbia8_ogimiel" }
       }
     ]
+  },
+  {
+    id: "vol_3",
+    vol: "Vol.3",
+    title: "7th GARDEN 09/17",
+    subtitle: "PLACE FOR ART AND MUSIC",
+    date: "2026.09.17 (THU)",
+    openTime: "18:00 - 24:00",
+    venue: "Compufunk Records & BAR (OSAKA)",
+    description: "3回目となる7th GARDEN。トワイライトタイムに響くtamakoのクリスタルボウルを合図に、夜が動き出す。四半世紀にわたってアンビエントの現場「U.V.」を継続してきたDUNE、チュニジアから来たポエトリーアーティストSen。そして、この夜のハイライトとなるのは、ダムタイプの初期からのメンバー山中透。気鋭の女性DJ KASSIS、映像、サウンドデザイン、DJ、AIなど、ジャンルを横断し続けるtvvtも加わり、レジェンドからニューカマーまでが肩の力を抜いてトライする。高いクォリティで展開するコンテンツだが、DJとギャラリーのあいだにボーダーはなく、誰もが等価にただそこに存在し、佇むことができる「庭」——7th GARDEN、9/17。",
+    entranceFee: "Charge Free",
+    hashtag: "#7thGarden #CompuFunk #Vol3Archive",
+    artists: [
+{
+      id: "artist_tamako",
+      name: "tamako",
+      roleLabel: "オープニング",
+      genre: "CRYSTAL BOWL / SOUND HEALING",
+      stage: "MAIN STAGE",
+      time: "18:00 - 18:15",
+      duration: "15m",
+      image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80",
+      bio: "【LIVE ACT / オープニング】クリスタルボウルの神秘的な倍音響が織りなすサウンドヒーリング。五感を満たす空間調整パフォーマンス。",
+      totalPoints: 9800,
+      likesCount: 120,
+      sns: {
+        instagram: "tamako_crystalbowl"
+        }
+      },
+{
+      id: "artist_sen11",
+      name: "Selector: Sen 11",
+      roleLabel: "Selector",
+      genre: "POETRY / SELECTOR",
+      stage: "MAIN STAGE",
+      time: "18:15 - 19:00",
+      duration: "45m",
+      image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80",
+      bio: "チュニジアから来日したポエトリーのアーティスト。選曲家として、音と言葉の境界を横断する。",
+      totalPoints: 8400,
+      likesCount: 95,
+      sns: {
+        instagram: "sen11_poetry"
+        }
+      },
+{
+      id: "artist_dune",
+      name: "Dune (U.V.)",
+      roleLabel: "DJ / Ambient",
+      genre: "EXPERIMENTAL / SOUNDSCAPE",
+      stage: "MAIN STAGE",
+      time: "19:00 - 19:45",
+      duration: "45m",
+      image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=600&q=80",
+      bio: "四半世紀にわたってアンビエントの現場「U.V.」を継続してきた第一人者。深遠なサウンドスケープと立体音響による空間実験を展開。",
+      totalPoints: 11200,
+      likesCount: 165,
+      sns: {
+        instagram: "dune_uv_official"
+        },
+      supportGoal: {
+        title: "写真家として一歩進むための良いレンズが欲しい！",
+        description: "四半世紀のDJ活動に加え、写真家としても表現の幅を広げる新たな一歩を踏み出したいと考えています。次の作品作りに向けた高品質なカメラレンズ導入を目指してPayPay投げ銭を募集中！ぜひ応援をお願いします。",
+        tag: "PHOTO / LENS",
+        targetAmount: "¥50,000",
+        memoKeyword: "DUNE"
+        }
+      },
+{
+      id: "artist_sen_jerry",
+      name: "Live P.A.: Sen & Jerry",
+      roleLabel: "Live P.A.",
+      genre: "POETRY / LIVE P.A.",
+      stage: "MAIN STAGE",
+      time: "19:45 - 20:15",
+      duration: "30m",
+      image: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=80",
+      bio: "チュニジアから来日したポエトリーのアーティストSenとJerryによるLive P.A.ユニット。音と言葉の境界を横断する。",
+      totalPoints: 7600,
+      likesCount: 88,
+      sns: {
+        instagram: "sen_jerry_live"
+        }
+      },
+{
+      id: "artist_youngandold",
+      name: "youngANDoldNEVERdie",
+      roleLabel: "DJ / Newcomer",
+      genre: "TECHNO / JAZZ",
+      stage: "MAIN STAGE",
+      time: "20:15 - 20:55",
+      duration: "40m",
+      image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80",
+      bio: "7th GARDEN初登場のニューカマー。テクノからジャズまで、ジャンルを問わず横断する選曲でフロアに新しい風を吹き込む。",
+      totalPoints: 9100,
+      likesCount: 104,
+      sns: {
+        instagram: "youngandoldneverdie"
+        }
+      },
+{
+      id: "artist_yamanaka",
+      name: "toru yamanaka (Dumb Type)",
+      roleLabel: "メインアクト",
+      genre: "TECHNO / ELECTRONIC / MINIMAL",
+      stage: "MAIN STAGE",
+      time: "20:55 - 21:55",
+      duration: "60m",
+      image: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80",
+      bio: "ダムタイプの初期からのメンバーとして知られる、関西シーンを代表するサウンドアーティスト。音と光が共鳴する没入型セットでフロアを魅了する。",
+      totalPoints: 16500,
+      likesCount: 210,
+      sns: {
+        instagram: "toruyamanaka_art"
+        }
+      },
+{
+      id: "artist_kassis",
+      name: "KASSIS (MOKSA.)",
+      roleLabel: "DJ",
+      genre: "MINIMAL TECHNO / LEFTFIELD",
+      stage: "MAIN STAGE",
+      time: "21:55 - 22:40",
+      duration: "45m",
+      image: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=600&q=80",
+      bio: "MOKSA.名義でも活動する気鋭の女性DJ。ミニマルテクノと繊細な音響テクスチャーが織りなす上質なラウンジセット。",
+      totalPoints: 8900,
+      likesCount: 115,
+      sns: {
+        instagram: "kassis_moksa"
+        },
+      supportGoal: {
+        title: "福井・大阪の二重拠点化に伴う制作・活動環境の整備！",
+        description: "福井と大阪の二重拠点での活動が本格スタート！2つの拠点を往来しながら良質な音楽を届け続けるため、移動・スタジオ制作環境の整備へのPayPay投げ銭サポートを大歓迎しています！",
+        tag: "DUAL BASE / STUDIO",
+        targetAmount: "¥30,000",
+        memoKeyword: "KASSIS"
+        }
+      },
+{
+      id: "artist_tvvt",
+      name: "tvvt",
+      roleLabel: "ラストアクト",
+      genre: "DEEP HOUSE / CHILL TECHNO",
+      stage: "MAIN STAGE",
+      time: "22:40 - 23:25",
+      duration: "45m",
+      image: "https://images.unsplash.com/photo-1571266028243-3716f02d2d2e?auto=format&fit=crop&w=600&q=80",
+      bio: "映像、サウンドデザイン、DJ、AIなど、ジャンルを横断し続けるクリエイター。7th Gardenのオーガナイズも手掛けながら、ディープで洗練された電子音響空間で夜を締めくくる。",
+      totalPoints: 13800,
+      likesCount: 172,
+      sns: {
+        instagram: "tvvt_7thgarden"
+        }
+      },
+{
+      id: "artist_fish_hiwatashi",
+      name: "FisH + HIWATASHI",
+      roleLabel: "VISUAL ACT",
+      genre: "LIVE PAINT + PROJECTION MAPPING",
+      stage: "VISUAL STAGE",
+      time: "18:00 - 24:00 (ALL NIGHT)",
+      duration: "ALL NIGHT",
+      image: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=80",
+      bio: "【SPECIAL VISUAL ACT】ライブペイントとプロジェクションマッピングを融合させるユニット。描かれていく筆致にリアルタイムで映像が重なり合う、一夜限りのデジタルアート演出。",
+      totalPoints: 14500,
+      likesCount: 185,
+      sns: {
+        instagram: "fish_hiwatashi_art"
+        }
+      }
+    ]
   }
 ];
 
+
+export const INITIAL_TIPS = [
+  {
+    id: "tip_mock_1",
+    fromUserId: "user_mock_1",
+    fromUserName: "KENJI_N",
+    toArtistId: "artist_yamanaka",
+    toArtistName: "toru yamanaka (Dumb Type)",
+    amount: 500,
+    message: "山中透さんのセット圧巻でした！最高です！🔥",
+    timestamp: new Date(Date.now() - 1000 * 60 * 12).toISOString()
+  },
+  {
+    id: "tip_mock_2",
+    fromUserId: "user_mock_2",
+    fromUserName: "SORA",
+    toArtistId: "artist_tamako",
+    toArtistName: "tamako",
+    amount: 300,
+    message: "クリスタルボウルの響きでオープニングから整いました✨",
+    timestamp: new Date(Date.now() - 1000 * 60 * 35).toISOString()
+  },
+  {
+    id: "tip_mock_3",
+    fromUserId: "user_mock_3",
+    fromUserName: "MEGUMI",
+    toArtistId: "artist_fish_hiwatashi",
+    toArtistName: "FisH + HIWATASHI",
+    amount: 300,
+    message: "プロジェクションマッピングとライブペイントの融合すごい！🎨",
+    timestamp: new Date(Date.now() - 1000 * 60 * 55).toISOString()
+  },
+  {
+    id: "tip_mock_4",
+    fromUserId: "user_mock_4",
+    fromUserName: "TAKASHI",
+    toArtistId: "artist_sen_jerry",
+    toArtistName: "Live P.A.: Sen & Jerry",
+    amount: 300,
+    message: "言葉と音の響きが唯一無二でした！👏",
+    timestamp: new Date(Date.now() - 1000 * 60 * 75).toISOString()
+  }
+];
