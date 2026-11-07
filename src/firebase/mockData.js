@@ -31,7 +31,7 @@ export const INITIAL_ARTISTS = [
     stage: "MAIN STAGE",
     time: "DJ SET",
     duration: "DJ",
-    bio: "【DJ】この「庭」に新たに加わるゲスト。90年代テクノのアプローチで挑む。",
+    bio: "【DJ】この「庭」に新たに加わるゲスト。ゲームミュージックのサウンドディレクターをルーツに持ち、90年代テクノのアプローチで挑む。",
     totalPoints: 0,
     likesCount: 0,
     sns: {}
@@ -92,11 +92,11 @@ export const INITIAL_ARTISTS = [
     id: "v4_artist_7",
     name: "youngANDoldNEVERdie",
     roleLabel: "DJ",
-    genre: "SELECTOR",
+    genre: "TECHNO / JAZZ",
     stage: "MAIN STAGE",
     time: "DJ SET",
     duration: "DJ",
-    bio: "【DJ】それぞれのスタイルで庭を彩る。",
+    bio: "【DJ】7th GARDEN初登場のニューカマー。テクノからジャズまで、ジャンルを問わず横断する選曲でフロアに新しい風を吹き込む。",
     totalPoints: 0,
     likesCount: 0,
     sns: {}
