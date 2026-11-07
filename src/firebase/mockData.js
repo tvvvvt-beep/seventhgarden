@@ -27,7 +27,7 @@ export const INITIAL_ARTISTS = [
     id: "v4_artist_2",
     name: "DJサンドウ",
     roleLabel: "DJ",
-    genre: "90'TECHNO",
+    genre: "90's TECHNO",
     stage: "MAIN STAGE",
     time: "DJ SET",
     duration: "DJ",
