@@ -1,17 +1,262 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import * as THREE from "three";
-import { Maximize2, RotateCcw } from "lucide-react";
+import { Maximize2, RotateCcw, Volume2, VolumeX, Sparkles } from "lucide-react";
 
 // ============================================================
-// Atkins Hero — Juan Atkins 追悼キービジュアル
-// ポスターの花画像を全屏で使い、テクノ/チル/ノイズの
-// シェーダー（走査線・粒状ノイズ・glitchズレ・位相変調）で
-// 常時揺らぐダブテク空間に。クリックでディフューズ・スピン。
+// Atkins Hero — Juan Atkins 追悼キービジュアル & Web Audio Dub Techno
+// 7th Garden Vol.4 @ Compufunk Records & BAR SPACE (OSAKA)
 // ============================================================
 
 const POSTER_URL = "/promo/7th_garden_1112_flyer.jpg";
 
-// ---- メイン背景シェーダー: 花ポスター + ノイズ + スキャン + glitch ----
+// ---- (1) Web Audio API Detroit Dub Techno Synthesizer ----
+class DubTechnoEngine {
+  constructor() {
+    this.ctx = null;
+    this.isPlaying = false;
+    this.bpm = 124;
+    this.step = 0;
+    this.timerId = null;
+    this.analyser = null;
+    this.dataArray = null;
+    this.masterGain = null;
+    this.delayNode = null;
+    this.delayFeedback = null;
+    this.delayFilter = null;
+  }
+
+  init() {
+    if (this.ctx) return;
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    this.ctx = new AudioContextClass();
+
+    this.analyser = this.ctx.createAnalyser();
+    this.analyser.fftSize = 64;
+    this.analyser.smoothingTimeConstant = 0.8;
+    this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+
+    this.masterGain = this.ctx.createGain();
+    this.masterGain.gain.setValueAtTime(0.75, this.ctx.currentTime);
+
+    // Dub Delay bus (dotted 3/16 echo at 124 BPM)
+    this.delayNode = this.ctx.createDelay();
+    this.delayNode.delayTime.setValueAtTime(0.363, this.ctx.currentTime);
+
+    this.delayFeedback = this.ctx.createGain();
+    this.delayFeedback.gain.setValueAtTime(0.46, this.ctx.currentTime);
+
+    // Lowpass filter inside delay loop for authentic tape dub damping
+    this.delayFilter = this.ctx.createBiquadFilter();
+    this.delayFilter.type = "lowpass";
+    this.delayFilter.frequency.setValueAtTime(1350, this.ctx.currentTime);
+
+    // Wire delay feedback loop
+    this.delayNode.connect(this.delayFilter);
+    this.delayFilter.connect(this.delayFeedback);
+    this.delayFeedback.connect(this.delayNode);
+
+    // Wire to master output & analyser
+    this.delayNode.connect(this.masterGain);
+    this.masterGain.connect(this.analyser);
+    this.analyser.connect(this.ctx.destination);
+  }
+
+  async start() {
+    this.init();
+    if (!this.ctx) return;
+    if (this.ctx.state === "suspended") {
+      await this.ctx.resume();
+    }
+    this.isPlaying = true;
+    this.masterGain.gain.setValueAtTime(0.75, this.ctx.currentTime);
+    this.schedule();
+  }
+
+  stop() {
+    this.isPlaying = false;
+    if (this.timerId) {
+      clearTimeout(this.timerId);
+      this.timerId = null;
+    }
+    if (this.masterGain && this.ctx) {
+      this.masterGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.05);
+    }
+  }
+
+  schedule = () => {
+    if (!this.isPlaying || !this.ctx) return;
+    const stepDuration = 60 / this.bpm / 4;
+    const now = this.ctx.currentTime;
+
+    this.playStep(this.step, now);
+    this.step = (this.step + 1) % 16;
+
+    this.timerId = setTimeout(this.schedule, stepDuration * 1000);
+  };
+
+  playStep(step, time) {
+    // Kick on quarter notes (0, 4, 8, 12)
+    if (step % 4 === 0) {
+      this.playKick(time);
+    }
+    // Offbeat open/closed hat on (2, 6, 10, 14)
+    if (step % 4 === 2) {
+      this.playHat(time, 0.22);
+    } else if (step % 2 === 1 && Math.random() < 0.28) {
+      this.playHat(time, 0.08);
+    }
+    // Dub chords on syncopated steps (step 4, 11)
+    if (step === 4 || step === 11 || (step === 0 && Math.random() < 0.2)) {
+      this.playDubChord(time);
+    }
+    // Deep sub bass
+    if (step === 0 || step === 3 || step === 8 || step === 10) {
+      const notes = [36.7, 43.65, 36.7, 41.2]; // D1, F1, D1, E1
+      this.playBass(time, notes[step % notes.length]);
+    }
+  }
+
+  playKick(time) {
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(145, time);
+    osc.frequency.exponentialRampToValueAtTime(36, time + 0.12);
+
+    gain.gain.setValueAtTime(0.9, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.28);
+
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+
+    osc.start(time);
+    osc.stop(time + 0.3);
+  }
+
+  playHat(time, vol = 0.2) {
+    const bufferSize = Math.floor(this.ctx.sampleRate * 0.04);
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = "highpass";
+    filter.frequency.setValueAtTime(7800, time);
+
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(vol, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.04);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.masterGain);
+
+    noise.start(time);
+    noise.stop(time + 0.045);
+  }
+
+  playDubChord(time) {
+    // Dm9 chord: D3 (146.8), F3 (174.6), A3 (220.0), C4 (261.6), E4 (329.6)
+    const freqs = [146.83, 174.61, 220.0, 261.63, 329.63];
+
+    const chordGain = this.ctx.createGain();
+    chordGain.gain.setValueAtTime(0.32, time);
+    chordGain.gain.exponentialRampToValueAtTime(0.001, time + 0.42);
+
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.Q.setValueAtTime(4.2, time);
+    filter.frequency.setValueAtTime(2300, time);
+    filter.frequency.exponentialRampToValueAtTime(420, time + 0.36);
+
+    freqs.forEach((freq) => {
+      [-3, 3].forEach((detune) => {
+        const osc = this.ctx.createOscillator();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(freq, time);
+        osc.detune.setValueAtTime(detune, time);
+        osc.connect(filter);
+        osc.start(time);
+        osc.stop(time + 0.44);
+      });
+    });
+
+    filter.connect(chordGain);
+    chordGain.connect(this.masterGain);
+    chordGain.connect(this.delayNode);
+  }
+
+  playBass(time, freq) {
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(freq, time);
+
+    gain.gain.setValueAtTime(0.38, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.22);
+
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+
+    osc.start(time);
+    osc.stop(time + 0.25);
+  }
+
+  triggerDrop() {
+    if (!this.ctx) this.init();
+    if (!this.ctx) return;
+    if (this.ctx.state === "suspended") this.ctx.resume();
+
+    const now = this.ctx.currentTime;
+    // Sub impact bass bomb
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(220, now);
+    osc.frequency.exponentialRampToValueAtTime(26, now + 0.65);
+
+    gain.gain.setValueAtTime(1.0, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+    gain.connect(this.delayNode);
+
+    osc.start(now);
+    osc.stop(now + 0.75);
+
+    // Burst chord
+    this.playDubChord(now + 0.04);
+  }
+
+  getAudioLevels() {
+    if (!this.analyser || !this.dataArray || !this.isPlaying) {
+      return { level: 0, bass: 0 };
+    }
+    this.analyser.getByteFrequencyData(this.dataArray);
+    let bassSum = 0;
+    for (let i = 0; i < 4; i++) {
+      bassSum += this.dataArray[i];
+    }
+    const bass = bassSum / (4 * 255);
+
+    let totalSum = 0;
+    for (let i = 0; i < this.dataArray.length; i++) {
+      totalSum += this.dataArray[i];
+    }
+    const level = totalSum / (this.dataArray.length * 255);
+
+    return { level, bass };
+  }
+}
+
+// ---- (2) GLSL Shaders ----
 const bgVert = /* glsl */ `
   varying vec2 vUv;
   void main() {
@@ -25,6 +270,8 @@ const bgFrag = /* glsl */ `
   uniform sampler2D uPoster;
   uniform float uTime;
   uniform float uChaos;
+  uniform float uAudioLevel;
+  uniform float uBassLevel;
   uniform vec2 uMouse;
   varying vec2 vUv;
 
@@ -34,70 +281,70 @@ const bgFrag = /* glsl */ `
 
   void main() {
     vec2 uv = vUv;
-
-    // 花画像を画面比率に合わせクロップ（cover）
     vec2 p = uv - 0.5;
 
-    // ゆっくり位相がずれる呼吸ズーム（Juan Atkins の dub techno 的余韻）
-    float breathe = 1.0 + sin(uTime * 0.18) * 0.045 + uChaos * 0.22;
+    // 呼吸ズーム + オーディオキック連動の脈動
+    float breathe = 1.0 + sin(uTime * 0.18) * 0.04 + uBassLevel * 0.14 + uChaos * 0.22;
     vec2 uvImg = p / breathe + 0.5;
 
-    // glitch: 時間とカオス量に依存した水平スライスずれ
+    // glitch: カオス時およびビートピーク時に水平スライスずれ
     float band = floor(uvImg.y * 42.0);
-    float g = step(0.985 - uChaos * 0.12, hash(vec2(band, floor(uTime * 7.0))));
-    uvImg.x += g * (hash(vec2(band + 3.0, floor(uTime * 7.0))) - 0.5) * (0.05 + uChaos * 0.28);
+    float gThreshold = 0.985 - uChaos * 0.14 - uBassLevel * 0.05;
+    float g = step(gThreshold, hash(vec2(band, floor(uTime * 8.0))));
+    uvImg.x += g * (hash(vec2(band + 3.0, floor(uTime * 8.0))) - 0.5) * (0.04 + uChaos * 0.25 + uBassLevel * 0.08);
 
-    // RGB分離（チルな微干渉 + カオス時拡大）
-    float ab = 0.0016 + sin(uTime * 0.7) * 0.0008 + uChaos * 0.012;
+    // RGB分離（音圧・ドロップで増幅）
+    float ab = 0.0016 + sin(uTime * 0.7) * 0.0008 + uBassLevel * 0.012 + uChaos * 0.02;
     vec3 col;
     col.r = texture2D(uPoster, uvImg + vec2(ab, 0.0)).r;
     col.g = texture2D(uPoster, uvImg).g;
     col.b = texture2D(uPoster, uvImg - vec2(ab, 0.0)).b;
 
-    // 冷たいシアンがかりのダブ色 + ブルーシャドウ（花の色は保つ）
+    // 冷たいシアン・ダブトーン
     col = mix(col, col * vec3(0.82, 0.94, 1.12), 0.38);
 
-    // 四周を少し落とすだけ（花を「最大限」見せるための浅い vignette）
+    // Vignette
     float vig = smoothstep(1.15, 0.45, length(p * vec2(1.0, 1.02)));
     col *= mix(0.62, 1.0, vig);
     col += vec3(0.0, 0.012, 0.03) * (1.0 - vig);
 
-    // 走査線（緩やか、深すぎない）
-    float scan = 0.94 + 0.06 * sin(uv.y * 700.0 + uTime * 2.0);
+    // 走査線
+    float scan = 0.94 + 0.06 * sin(uv.y * 720.0 + uTime * 2.0);
     col *= scan;
 
-    // 粒状ノイズ（フィルムの粒子 = noise要素）
-    float grain = (hash(uv * 900.0 + fract(uTime) * 137.0) - 0.5) * (0.06 + uChaos * 0.10);
+    // フィルムグレインノイズ
+    float grain = (hash(uv * 900.0 + fract(uTime) * 137.0) - 0.5) * (0.05 + uChaos * 0.10 + uAudioLevel * 0.04);
     col += grain;
 
-    // 明部への微グロー（チルな発光）
+    // 明部グロー（キック音圧でフラッシュ）
     float lum = dot(col, vec3(0.299, 0.587, 0.114));
-    col += vec3(0.06, 0.10, 0.15) * smoothstep(0.6, 1.0, lum) * (0.5 + 0.5 * sin(uTime * 0.9));
+    col += vec3(0.08, 0.14, 0.20) * smoothstep(0.55, 1.0, lum) * (0.4 + 0.6 * sin(uTime * 0.9) + uBassLevel * 0.8);
 
-    // マウスでわずかに明部が追従（dub echo 的）
+    // マウス追従
     float d = length(uv - (uMouse * 0.5 + 0.5));
-    col += vec3(0.04, 0.07, 0.10) * smoothstep(0.35, 0.0, d);
+    col += vec3(0.04, 0.08, 0.12) * smoothstep(0.35, 0.0, d);
 
     gl_FragColor = vec4(col, 1.0);
   }
 `;
 
-// ---- ガラス shard シェーダー: 花の断片（クリックで散乱） ----
 const shardFrag = /* glsl */ `
   precision highp float;
   uniform sampler2D uPoster;
   uniform float uTime;
+  uniform float uAudioLevel;
   varying vec2 vUv;
   void main() {
     vec3 col = texture2D(uPoster, vUv).rgb;
-    col = mix(col, col * vec3(0.6, 0.85, 1.2), 0.4);
+    col = mix(col, col * vec3(0.6, 0.88, 1.25), 0.45);
     float edge = smoothstep(0.0, 0.12, vUv.x) * smoothstep(1.0, 0.88, vUv.x)
                * smoothstep(0.0, 0.12, vUv.y) * smoothstep(1.0, 0.88, vUv.y);
-    float alpha = 0.55 + 0.25 * sin(uTime * 1.3 + vUv.y * 6.0);
+    float alpha = 0.55 + 0.3 * sin(uTime * 1.5 + vUv.y * 6.0) + uAudioLevel * 0.4;
     gl_FragColor = vec4(col, alpha * edge);
   }
 `;
 
+// ---- (3) Text Texture Generator ----
 function createTextTexture(text, options = {}) {
   const {
     textColor = "#ffffff",
@@ -151,19 +398,46 @@ function createTextTexture(text, options = {}) {
   return { texture: tex, aspect: canvasWidth / canvasHeight };
 }
 
+// ---- (4) Main Hero Component ----
 export default function AtkinsHero3D({ onOpenModal, entranceFee = "Charge Free" }) {
   const mountRef = useRef(null);
   const isIntersecting = useRef(true);
   const mousePos = useRef({ x: 0, y: 0 });
   const targetMouse = useRef({ x: 0, y: 0 });
-
   const chaosProgress = useRef(0);
-  const [isSpinning, setIsSpinning] = useState(false);
 
-  const triggerChaos = () => {
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const audioRef = useRef(null);
+
+  // Init Audio Engine instance
+  useEffect(() => {
+    audioRef.current = new DubTechnoEngine();
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.stop();
+      }
+    };
+  }, []);
+
+  const toggleAudio = useCallback(async () => {
+    if (!audioRef.current) return;
+    if (isPlayingAudio) {
+      audioRef.current.stop();
+      setIsPlayingAudio(false);
+    } else {
+      await audioRef.current.start();
+      setIsPlayingAudio(true);
+    }
+  }, [isPlayingAudio]);
+
+  const triggerChaos = useCallback(() => {
     chaosProgress.current = 1.0;
     setIsSpinning(true);
-  };
+    if (audioRef.current) {
+      audioRef.current.triggerDrop();
+    }
+  }, []);
 
   useEffect(() => {
     const container = mountRef.current;
@@ -185,20 +459,22 @@ export default function AtkinsHero3D({ onOpenModal, entranceFee = "Charge Free" 
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     container.appendChild(renderer.domElement);
 
-    // ---- ポスターテクスチャ（花画像）----
+    // Poster Texture
     const loader = new THREE.TextureLoader();
     const posterTex = loader.load(POSTER_URL);
     posterTex.colorSpace = THREE.SRGBColorSpace;
     posterTex.wrapS = posterTex.wrapT = THREE.ClampToEdgeWrapping;
 
-    // ---- (A) 全屏背景プラン（シェーダーでノイズ/scan/glitch）----
+    // Fullscreen Shader Plane
     const bgUniforms = {
       uPoster: { value: posterTex },
       uTime: { value: 0 },
       uChaos: { value: 0 },
+      uAudioLevel: { value: 0 },
+      uBassLevel: { value: 0 },
       uMouse: { value: new THREE.Vector2(0, 0) },
     };
-    // カメラに固定されるよう、シーンの奥に配置しサイズは視錐に合わせて計算
+
     const bgGeom = new THREE.PlaneGeometry(1, 1);
     const bgMat = new THREE.ShaderMaterial({
       uniforms: bgUniforms,
@@ -220,28 +496,27 @@ export default function AtkinsHero3D({ onOpenModal, entranceFee = "Charge Free" 
     };
     fitBgPlane();
 
-    // ---- (B) 花の断片 shards（クリックで空間に散る）----
+    // 3D Glass Shards
     const shardGroup = new THREE.Group();
     scene.add(shardGroup);
     const shards = [];
-    const SHARD_N = 14;
+    const SHARD_N = 16;
     for (let i = 0; i < SHARD_N; i++) {
       const w = 0.5 + Math.random() * 0.9;
       const h = 0.5 + Math.random() * 0.9;
       const geom = new THREE.PlaneGeometry(w, h);
-      // ポスター上のランダムなUV窓を切り抜く
       const su = 0.15 + Math.random() * 0.7;
       const sv = 0.15 + Math.random() * 0.7;
       const uvAttr = geom.attributes.uv;
       for (let k = 0; k < uvAttr.count; k++) {
-        uvAttr.setXY(
-          k,
-          su + uvAttr.getX(k) * 0.3,
-          sv + uvAttr.getY(k) * 0.3
-        );
+        uvAttr.setXY(k, su + uvAttr.getX(k) * 0.3, sv + uvAttr.getY(k) * 0.3);
       }
       const mat = new THREE.ShaderMaterial({
-        uniforms: { uPoster: { value: posterTex }, uTime: { value: 0 } },
+        uniforms: {
+          uPoster: { value: posterTex },
+          uTime: { value: 0 },
+          uAudioLevel: { value: 0 },
+        },
         vertexShader: bgVert,
         fragmentShader: shardFrag,
         transparent: true,
@@ -262,7 +537,28 @@ export default function AtkinsHero3D({ onOpenModal, entranceFee = "Charge Free" 
       shards.push(mesh);
     }
 
-    // ---- (C) ホログラフィック・タイポグラフィ（浮遊）----
+    // Audio-reactive Equalizer Ring (Glowing 3D Visualizer Circle)
+    const RING_COUNT = 64;
+    const ringGeom = new THREE.BufferGeometry();
+    const ringPos = new Float32Array(RING_COUNT * 3);
+    for (let i = 0; i < RING_COUNT; i++) {
+      const theta = (i / RING_COUNT) * Math.PI * 2;
+      ringPos[i * 3] = Math.cos(theta) * 1.45;
+      ringPos[i * 3 + 1] = Math.sin(theta) * 1.45;
+      ringPos[i * 3 + 2] = 0.2;
+    }
+    ringGeom.setAttribute("position", new THREE.BufferAttribute(ringPos, 3));
+    const ringMat = new THREE.LineBasicMaterial({
+      color: 0x67e8f9,
+      transparent: true,
+      opacity: 0.65,
+      blending: THREE.AdditiveBlending,
+      linewidth: 2,
+    });
+    const ringLine = new THREE.LineLoop(ringGeom, ringMat);
+    scene.add(ringLine);
+
+    // Holographic Typography
     const textItems = [
       { text: "IN MEMORIAM", color: "#9fd8ff", size: 34, height: 0.24, pos: [0, 1.62, 0.5] },
       { text: "JUAN ATKINS", color: "#ffffff", size: 64, height: 0.46, pos: [0, 1.28, 0.6] },
@@ -303,8 +599,8 @@ export default function AtkinsHero3D({ onOpenModal, entranceFee = "Charge Free" 
       textMeshes.push(mesh);
     });
 
-    // ---- (D) 微粒子ダスト（シルバー + ごく薄いシアン）----
-    const N = 260;
+    // Particle Spores (Dust)
+    const N = 280;
     const pGeom = new THREE.BufferGeometry();
     const pPos = new Float32Array(N * 3);
     const pCol = new Float32Array(N * 3);
@@ -323,14 +619,14 @@ export default function AtkinsHero3D({ onOpenModal, entranceFee = "Charge Free" 
       size: 0.045,
       vertexColors: true,
       transparent: true,
-      opacity: 0.5,
+      opacity: 0.55,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
     const particles = new THREE.Points(pGeom, pMat);
     scene.add(particles);
 
-    // ---- (E) 缓慢な走査ビーム（dub techno のパルス）----
+    // Dub Pulse Scanning Beam
     const beamGeom = new THREE.PlaneGeometry(14, 0.06);
     const beamMat = new THREE.MeshBasicMaterial({
       color: 0x8fd4ff,
@@ -342,7 +638,7 @@ export default function AtkinsHero3D({ onOpenModal, entranceFee = "Charge Free" 
     const beam = new THREE.Mesh(beamGeom, beamMat);
     scene.add(beam);
 
-    // ---- (F) インタラクション ----
+    // Interaction Listeners
     const handleMove = (e) => {
       const rect = container.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -354,7 +650,9 @@ export default function AtkinsHero3D({ onOpenModal, entranceFee = "Charge Free" 
       targetMouse.current.x = 0;
       targetMouse.current.y = 0;
     };
-    const handleClick = () => triggerChaos();
+    const handleClick = () => {
+      triggerChaos();
+    };
 
     container.addEventListener("mousemove", handleMove);
     container.addEventListener("touchmove", handleMove, { passive: true });
@@ -362,13 +660,27 @@ export default function AtkinsHero3D({ onOpenModal, entranceFee = "Charge Free" 
     container.addEventListener("touchend", handleLeave);
     container.addEventListener("click", handleClick);
 
-    // ---- (G) ループ ----
+    // Animation Loop
     let animId;
     const clock = new THREE.Clock();
 
     const animate = () => {
       if (isIntersecting.current) {
         const t = clock.getElapsedTime();
+
+        // Audio Reactive Values
+        let audioLevel = 0;
+        let bassLevel = 0;
+        if (audioRef.current && audioRef.current.isPlaying) {
+          const levels = audioRef.current.getAudioLevels();
+          audioLevel = levels.level;
+          bassLevel = levels.bass;
+        } else {
+          // Rhythmic fallback simulation at 124 BPM
+          const beat = Math.sin(t * 13.0);
+          bassLevel = Math.max(0, beat) * 0.45;
+          audioLevel = 0.15 + bassLevel * 0.25;
+        }
 
         mousePos.current.x = THREE.MathUtils.lerp(mousePos.current.x, targetMouse.current.x, 0.05);
         mousePos.current.y = THREE.MathUtils.lerp(mousePos.current.y, targetMouse.current.y, 0.05);
@@ -383,16 +695,31 @@ export default function AtkinsHero3D({ onOpenModal, entranceFee = "Charge Free" 
 
         bgUniforms.uTime.value = t;
         bgUniforms.uChaos.value = chaos;
+        bgUniforms.uAudioLevel.value = audioLevel;
+        bgUniforms.uBassLevel.value = bassLevel;
         bgUniforms.uMouse.value.set(mousePos.current.x, mousePos.current.y);
 
-        // カメラの極小ドリフト（チルな浮遊）
+        // Camera gentle drift & bass reaction
         camera.position.x = Math.sin(t * 0.22) * 0.1 + mousePos.current.x * 0.22;
         camera.position.y = Math.cos(t * 0.18) * 0.08 + mousePos.current.y * 0.18;
-        camera.position.z = 5 - chaos * 0.6;
+        camera.position.z = 5 - chaos * 0.6 - bassLevel * 0.15;
         camera.lookAt(0, 0, 0);
         fitBgPlane();
 
-        // shards: 平常はゆっくり周回、クリックで爆散タンブリング
+        // Animate Equalizer Ring
+        const posArr = ringGeom.attributes.position.array;
+        const baseR = 1.45 + bassLevel * 0.35 + chaos * 0.4;
+        for (let i = 0; i < RING_COUNT; i++) {
+          const theta = (i / RING_COUNT) * Math.PI * 2;
+          const wave = Math.sin(theta * 8.0 + t * 4.0) * (0.04 + bassLevel * 0.12);
+          const r = baseR + wave;
+          posArr[i * 3] = Math.cos(theta) * r;
+          posArr[i * 3 + 1] = Math.sin(theta) * r;
+        }
+        ringGeom.attributes.position.needsUpdate = true;
+        ringMat.opacity = 0.35 + bassLevel * 0.6 + chaos * 0.3;
+
+        // Shards motion
         shards.forEach((mesh) => {
           const u = mesh.userData;
           const idle = new THREE.Vector3(
@@ -401,7 +728,7 @@ export default function AtkinsHero3D({ onOpenModal, entranceFee = "Charge Free" 
             u.home.z
           );
           const ca = u.angle + t * u.speed * 2.2;
-          const r = 2.4 + Math.sin(t * 1.6 + u.drift) * 0.8;
+          const r = 2.4 + Math.sin(t * 1.6 + u.drift) * 0.8 + bassLevel * 0.4;
           const chaosPos = new THREE.Vector3(
             Math.cos(ca) * r,
             Math.sin(ca) * r * 0.75,
@@ -416,9 +743,10 @@ export default function AtkinsHero3D({ onOpenModal, entranceFee = "Charge Free" 
             mesh.rotation.y = THREE.MathUtils.lerp(mesh.rotation.y, mousePos.current.x * 0.3, 0.06);
           }
           mesh.material.uniforms.uTime.value = t;
+          mesh.material.uniforms.uAudioLevel.value = audioLevel;
         });
 
-        // text: 平常は浮遊、クリックで渦に飲まれる
+        // Text typography motion
         textMeshes.forEach((mesh) => {
           const u = mesh.userData;
           const idlePos = new THREE.Vector3(
@@ -443,15 +771,14 @@ export default function AtkinsHero3D({ onOpenModal, entranceFee = "Charge Free" 
             mesh.rotation.y = THREE.MathUtils.lerp(mesh.rotation.y, 0, 0.1);
             mesh.rotation.z = THREE.MathUtils.lerp(mesh.rotation.z, 0, 0.1);
           }
-          // IN MEMORIAM のフェーディング（追悼の明滅）
           if (u.homePos.y > 1.5) {
             u.material.opacity = 0.75 + Math.sin(t * 0.6) * 0.25;
           }
         });
 
-        // パルスビーム
+        // Pulse scanning beam
         beam.position.y = ((t * 0.35) % 2.4) - 1.2;
-        beam.material.opacity = 0.10 + Math.max(0, Math.sin(t * 1.7)) * 0.10;
+        beam.material.opacity = 0.10 + Math.max(0, Math.sin(t * 1.7)) * 0.10 + bassLevel * 0.12;
 
         particles.rotation.y = t * 0.015;
         particles.position.x = mousePos.current.x * 0.3;
@@ -498,6 +825,8 @@ export default function AtkinsHero3D({ onOpenModal, entranceFee = "Charge Free" 
       beamMat.dispose();
       pGeom.dispose();
       pMat.dispose();
+      ringGeom.dispose();
+      ringMat.dispose();
       posterTex.dispose();
       shards.forEach((m) => {
         m.geometry.dispose();
@@ -510,30 +839,61 @@ export default function AtkinsHero3D({ onOpenModal, entranceFee = "Charge Free" 
       });
       renderer.dispose();
     };
-  }, []);
+  }, [triggerChaos]);
 
   return (
-    <div className="relative w-full rounded-3xl overflow-hidden bg-[#04060b] border border-cyan-200/10 shadow-2xl select-none">
+    <div className="relative w-full rounded-3xl overflow-hidden bg-[#04060b] border border-cyan-200/20 shadow-2xl select-none">
       {/* 3D Key Visual Canvas */}
       <div
         ref={mountRef}
         className="w-full h-[520px] sm:h-[580px] relative overflow-hidden cursor-pointer"
-        title="タップ/クリックで花の断片が散って、また収束します"
+        title="タップ/クリックでドロップ＆拡散します"
       />
 
       {/* Top Left Badge */}
-      <div className="absolute top-3.5 left-3.5 z-10 flex items-center gap-2 pointer-events-none">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-black/70 backdrop-blur-md border border-cyan-200/25 text-cyan-100 font-mono text-[10px] font-bold tracking-widest rounded-full">
+      <div className="absolute top-3.5 left-3.5 z-10 flex flex-wrap items-center gap-2 pointer-events-none">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-black/75 backdrop-blur-md border border-cyan-200/30 text-cyan-100 font-mono text-[10px] font-bold tracking-widest rounded-full">
           <span className="w-1.5 h-1.5 rounded-full bg-cyan-300 animate-pulse" />
-          <span>7TH GARDEN</span>
+          <span>7TH GARDEN Vol.4</span>
         </span>
         <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-cyan-100/10 backdrop-blur-md border border-cyan-100/20 text-cyan-50 font-mono text-[10px] font-bold tracking-widest rounded-full">
           {entranceFee}
         </span>
       </div>
 
-      {/* Top Right Spin Button */}
-      <div className="absolute top-3.5 right-3.5 z-10">
+      {/* Top Right Controls (Sound Toggle & Diffuse / Drop) */}
+      <div className="absolute top-3.5 right-3.5 z-10 flex items-center gap-2">
+        {/* Sound ON/OFF Toggle */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleAudio();
+          }}
+          className={`flex items-center gap-1.5 px-3 py-1 rounded-full backdrop-blur-md border transition-all text-[10px] font-mono font-bold shadow-lg ${
+            isPlayingAudio
+              ? "bg-cyan-300 text-black border-cyan-200 shadow-cyan-400/30 scale-105 animate-pulse"
+              : "bg-black/80 hover:bg-cyan-900/40 text-cyan-200 border-cyan-300/40 hover:border-cyan-200"
+          }`}
+          title="Web Audio APIによる124 BPMデトロイト・ダブテクノ実音再生"
+        >
+          {isPlayingAudio ? (
+            <>
+              <Volume2 className="w-3.5 h-3.5 text-black animate-bounce" />
+              <span>124 BPM SOUND ON</span>
+              <span className="flex items-center gap-0.5 ml-0.5">
+                <span className="w-1 h-2.5 bg-black rounded-full animate-ping" />
+                <span className="w-1 h-3.5 bg-black rounded-full animate-pulse" />
+              </span>
+            </>
+          ) : (
+            <>
+              <VolumeX className="w-3.5 h-3.5 text-cyan-300" />
+              <span className="text-cyan-100">SOUND: OFF (TAP TO PLAY)</span>
+            </>
+          )}
+        </button>
+
+        {/* Diffuse / Drop Button */}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -541,12 +901,12 @@ export default function AtkinsHero3D({ onOpenModal, entranceFee = "Charge Free" 
           }}
           className={`flex items-center gap-1.5 px-3 py-1 rounded-full backdrop-blur-md border transition-all text-[10px] font-mono font-bold shadow-md ${
             isSpinning
-              ? "bg-cyan-200 text-black border-cyan-100 scale-105"
-              : "bg-black/70 hover:bg-cyan-100/15 text-cyan-100 border-cyan-200/25 hover:border-cyan-100"
+              ? "bg-purple-300 text-black border-purple-200 scale-105"
+              : "bg-black/75 hover:bg-cyan-100/15 text-cyan-100 border-cyan-200/25 hover:border-cyan-100"
           }`}
         >
           <RotateCcw className={`w-3 h-3 ${isSpinning ? "animate-spin text-black" : "text-cyan-100"}`} />
-          <span>{isSpinning ? "DIFFUSING" : "CLICK TO DIFFUSE"}</span>
+          <span>{isSpinning ? "DIFFUSING" : "⚡ DROP / DIFFUSE"}</span>
         </button>
       </div>
 
@@ -557,10 +917,11 @@ export default function AtkinsHero3D({ onOpenModal, entranceFee = "Charge Free" 
             e.stopPropagation();
             triggerChaos();
           }}
-          className="text-[10px] font-mono text-cyan-100/80 bg-black/60 hover:bg-black/85 backdrop-blur-md border border-cyan-200/15 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all"
+          className="text-[10px] font-mono text-cyan-100/90 bg-black/70 hover:bg-black/90 backdrop-blur-md border border-cyan-200/25 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all shadow-md"
         >
+          <Sparkles className="w-3 h-3 text-cyan-300" />
           <span className="text-cyan-50 font-bold">画面タップ</span>
-          <span>で拡散 ↺</span>
+          <span>でドロップ ↺</span>
         </button>
 
         <button
@@ -568,7 +929,7 @@ export default function AtkinsHero3D({ onOpenModal, entranceFee = "Charge Free" 
             e.stopPropagation();
             onOpenModal && onOpenModal();
           }}
-          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-cyan-100/10 hover:bg-cyan-100/20 backdrop-blur-md border border-cyan-100/25 text-cyan-50 font-mono text-[11px] font-bold shadow-lg transition-all active:scale-95"
+          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-cyan-100/15 hover:bg-cyan-100/25 backdrop-blur-md border border-cyan-100/30 text-cyan-50 font-mono text-[11px] font-bold shadow-lg transition-all active:scale-95"
         >
           <Maximize2 className="w-3.5 h-3.5" />
           <span>公式ポスター拡大</span>
