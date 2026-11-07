@@ -109,7 +109,7 @@ export const INITIAL_ARTISTS = [
     stage: "MAIN STAGE",
     time: "VJ",
     duration: "VJ",
-    bio: "【VJ】フロアデビュー。テクノへの熱を、繊細な映像に織り込んでいく。",
+    bio: "【VJ】粒子や流体などの有機的テクスチャーを構築し、音と空間に寄り添う没入体験を創出する、TouchDesignerの住人。フロア中の網膜を、繊細な粒子群と流体ノイズで侵食していく。",
     totalPoints: 0,
     likesCount: 0,
     sns: {}
