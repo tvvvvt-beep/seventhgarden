@@ -45,12 +45,6 @@ function MainApp() {
     setActiveTab("detail");
   };
 
-  const handleNavigateToLineup = () => {
-    setTipModalConfig(null);
-    setSelectedArtistDetail(null);
-    setActiveTab("lineup");
-  };
-
   const handleTipSuccess = () => {
     loadData();
   };
@@ -127,7 +121,6 @@ function MainApp() {
           initialMode={tipModalConfig.mode}
           onClose={() => setTipModalConfig(null)}
           onSuccess={handleTipSuccess}
-          onNavigateToLineup={handleNavigateToLineup}
         />
       )}
 
