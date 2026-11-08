@@ -136,6 +136,7 @@ export default function EventManagementTab({ onEventUpdated }) {
   const handleResetDefaults = async () => {
     if (!window.confirm("イベント設定と出演者一覧を初期状態に戻しますか？")) return;
     localStorage.removeItem("party_artists_custom");
+    localStorage.removeItem("sg_artist_draft_v1");
     localStorage.removeItem("sg_event_info_override_v1");
     await loadData();
     onEventUpdated && onEventUpdated();

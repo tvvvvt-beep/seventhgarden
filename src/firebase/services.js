@@ -177,19 +177,16 @@ export async function sendTipTransaction({ userId, userProfile, artistId, amount
 }
 
 /**
-/**
- * アーティスト一覧の取得（保存されたカスタム一覧があればそれを優先、なければ INITIAL_ARTISTS）
+ * アーティスト一覧の取得
+ * 2026-11-08 ガバナンス確定: プロフィール内容（名前/肩書き/bio/SNS）の
+ * 単一信頼源はコード内 mockData（git管理→ビルド→Vercelデプロイ）。
+ * 旧 localStorage `party_artists_custom` の端末別オーバーライドは、
+ * 他端末の利用者に一切反映されず「保存したのに出てない」事故の原因になる
+ * ため、一般読み取りから廃止（編集UIの下書きのみ別キー sg_artist_draft_v1）。
+ * Firestore `artists/*` からは volatile データ（totalPoints/likesCount）のみ合成する。
  */
 export async function fetchArtistsList() {
-  const customArtistsRaw = localStorage.getItem("party_artists_custom");
-  let baseArtists = INITIAL_ARTISTS;
-  if (customArtistsRaw) {
-    try {
-      baseArtists = JSON.parse(customArtistsRaw);
-    } catch (e) {
-      baseArtists = INITIAL_ARTISTS;
-    }
-  }
+  const baseArtists = INITIAL_ARTISTS;
 
   if (!isConfigured || !db) {
     return baseArtists;
@@ -227,7 +224,8 @@ export async function fetchArtistsList() {
  */
 export async function saveArtistsList(artists) {
   try {
-    localStorage.setItem("party_artists_custom", JSON.stringify(artists));
+    // 編集UIの下書き専用キー（一般読み取りには使わない。旧party_artists_customは廃止）
+    localStorage.setItem("sg_artist_draft_v1", JSON.stringify(artists));
     if (isConfigured && db) {
       for (const artist of artists) {
         const artistRef = doc(db, "artists", artist.id);
