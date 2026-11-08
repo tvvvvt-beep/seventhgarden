@@ -4,7 +4,7 @@ import { sendTipTransaction } from "../firebase/services";
 import { Heart, CheckCircle2, AlertCircle, X, Send, Info, Copy, Check, Coins, PartyPopper, ExternalLink } from "lucide-react";
 import confetti from "canvas-confetti";
 
-export const PAYPAY_TRANSFER_URL = "https://qr.paypay.ne.jp/p2p01_PRYRSpRaMYAWkg07";
+export const PAYPAY_TRANSFER_URL = "https://qr.paypay.ne.jp/p2p01_Z42XbfzWP1YD3Vfe";
 
 export default function TipModal({ artist, initialMode = "paypay", onClose, onSuccess }) {
   const { currentUser, userProfile, setUserProfile } = useAuth();
