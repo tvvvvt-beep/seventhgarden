@@ -4,6 +4,15 @@
 
 ## 0. 基本原則（決定済み）
 
+**GitHub 中心運用**（2026-11-08 追加決定・tvvt_sakai/桜井）: すべての変更は GitHub リポジトリへのコミット経由。デプロイは `push → GitHub Actions → Vercel` 自動（`.github/workflows/deploy.yml`）。エージェント間共有メモリは置かず、**運用知識はこのリポジトリの `AGENTS.md` に置く**（読めば誰でも/どのAIでも同じ動作できるようにする）。Muse↔Hermes の連絡は `tvvvvt-beep/tasks` リポジトリの issue。
+
+| 役割 | 担当 |
+|---|---|
+| tvvt_sakai | 最終承認・会計・Firebaseコンソール |
+| 桜井さん | コンテンツ決定（プロフィール/Vol出演者） |
+| Meta Muse | 桜井さんの代理人として mockData.js を GitHub で編集→push |
+| Hermes | マージ・本番検証・インフラ・hotfix |
+
 **「静的コンテンツは git、変動データは Firestore」** の分担を単一信頼源原則として採用。
 理由: Vol 運営は月1回程度でコンテンツ変更頻度が低く、git は監査履歴・巻き戻し・レビューが無料で付き、 Firestore はルール設定を誤ると全公開リスク。頻度低い編集にランタイムDBのリスクを取る利き目が薄い。
 
