@@ -230,7 +230,7 @@ export default function TipModal({ artist, initialMode = "paypay", onClose, onSu
                   </div>
                   <div className="p-2 rounded-xl bg-dark-surface/90 border border-purple-500/40 bg-purple-500/10">
                     <span className="text-base block">👑</span>
-                    <span className="text-[11px] font-black text-neon-cyan font-mono block">¥3,000~</span>
+                    <span className="text-[11px] font-black text-neon-cyan font-mono block">¥2,000~</span>
                     <span className="text-[8px] text-purple-300 font-bold">VIPパトロン</span>
                   </div>
                 </div>
@@ -498,7 +498,7 @@ export default function TipModal({ artist, initialMode = "paypay", onClose, onSu
                       </div>
                       <div className="p-2 rounded-xl bg-dark-surface/90 border border-purple-500/40 bg-purple-500/10">
                         <span className="text-base block">👑</span>
-                        <span className="text-[11px] font-black text-neon-cyan font-mono block">¥3,000~</span>
+                        <span className="text-[11px] font-black text-neon-cyan font-mono block">¥2,000~</span>
                         <span className="text-[8px] text-purple-300 font-bold">VIPサポーター</span>
                       </div>
                     </div>

@@ -3,7 +3,7 @@ import { EVENT_INFO, PAST_EVENTS } from "../firebase/mockData";
 import { Calendar, MapPin, Clock, Sparkles, ChevronRight, QrCode, Heart, History, Target, ArrowUpRight, Eye, Download, X } from "lucide-react";
 import ArtistCard from "../components/ArtistCard";
 import RecentTipsFeed from "../components/RecentTipsFeed";
-import AtkinsHeroText from "../components/AtkinsHeroText";
+import MemorialHero from "../components/MemorialHero";
 
 export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist, setActiveTab, setActiveEventTab }) {
   const photoOnlyUrl = "/promo/7th_garden_0917_photo_only.jpg";
@@ -16,9 +16,10 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
     <div className="space-y-6 pb-6 animate-fadeIn max-w-full overflow-hidden">
       {/* Atkins Memorial Hero — text only */}
       <div className="w-full">
-        <AtkinsHeroText
+        <MemorialHero
           onOpenModal={() => setShowFlyerModal(true)}
           entranceFee={EVENT_INFO.entranceFee}
+          artists={artists}
         />
       </div>
 
