@@ -123,6 +123,113 @@ export default function HomePage({ artists, tips, onOpenTipModal, onSelectArtist
       </div>
       )}
 
+      {/* ARTIST GOALS & PAYPAY — 自己実現枠セクション */}
+      {artists.some(a => a.supportGoal) && (() => {
+        const featuredList = artists
+          .filter(a => a.supportGoal)
+          .sort((a, b) => {
+            const nameLower = (a.name || "").toLowerCase();
+            if (nameLower.includes("dune") || nameLower.includes("kassis")) return -1;
+            return 1;
+          });
+        return (
+          <div className="mt-6 mb-4 overflow-hidden">
+            <div className="bg-gradient-to-r from-dark-surface/80 to-dark-card border border-neon-purple/30 rounded-2xl p-4 md:p-5 shadow-lg relative group hover:border-red-500/50 transition-all">
+              <div className="flex items-center justify-between flex-wrap gap-1.5 mb-3.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🎯</span>
+                  <h2 className="text-xs md:text-sm font-black text-white font-sans">
+                    アーティストの自己実現プロジェクト
+                  </h2>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/40 text-[9px] font-mono font-extrabold uppercase">
+                    <Heart className="w-2.5 h-2.5 fill-red-400 text-red-400" />
+                    PayPay Support Accepted
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-[9px] md:text-[10px] font-mono text-neon-cyan font-bold">
+                  <Sparkles className="w-3 h-3 text-neon-yellow" />
+                  <span>PayPayで各アーティストの目標を直接応援！</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {featuredList.map((artist) => {
+                  const goal = artist.supportGoal;
+                  return (
+                    <div 
+                      key={`goal-${artist.id}`}
+                      className="p-4 rounded-xl bg-gradient-to-br from-red-950/40 via-dark-bg to-pink-950/30 border border-red-500/30 hover:border-red-500/70 transition-all flex flex-col justify-between shadow-lg group/goal-card"
+                    >
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-[10px] font-mono">
+                          <span className="px-2 py-0.5 rounded bg-red-500/20 text-red-300 font-bold border border-red-500/30 flex items-center gap-1">
+                            <Target className="w-3 h-3" />
+                            自己実現プロジェクト
+                          </span>
+                          <span className="text-gray-400 truncate max-w-[110px] md:max-w-[130px]">
+                            @{artist.name}
+                          </span>
+                        </div>
+
+                        <h3 className="text-xs md:text-sm font-black text-white leading-snug">
+                          {goal.title}
+                        </h3>
+
+                        <p className="text-[11px] md:text-xs text-gray-300 leading-relaxed line-clamp-3">
+                          {goal.description}
+                        </p>
+
+                        {goal.amount && (
+                          <div className="mt-2 flex items-center justify-between text-[10px] font-mono text-gray-400">
+                            <span>目標金額:</span>
+                            <span className="text-neon-yellow font-bold">
+                              {goal.amount}
+                            </span>
+                          </div>
+                        )}
+
+                        <div className="mt-1.5 flex items-center justify-between text-[10px] font-mono text-gray-400">
+                          <span>送金時メモ欄キーワード:</span>
+                          <span className="text-white font-extrabold">
+                            {goal.memoKeyword || artist.name}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="mt-3.5 pt-3 border-t border-red-500/20 flex gap-2">
+                        <button
+                          onClick={() => onOpenTipModal(artist, "paypay")}
+                          className="flex-1 bg-gradient-to-r from-red-500 via-pink-600 to-neon-purple text-white font-black text-xs py-2 rounded-lg shadow hover:opacity-95 transition-all flex items-center justify-center gap-1.5 active:scale-95"
+                        >
+                          <Heart className="w-3.5 h-3.5 fill-white" />
+                          <span>PayPayで応援する</span>
+                        </button>
+
+                        <button
+                          onClick={() => onSelectArtist(artist)}
+                          className="px-3 py-2 rounded-lg bg-dark-surface hover:bg-dark-border/40 border border-dark-border text-gray-300 text-[11px] font-mono transition-all flex items-center justify-center gap-1"
+                        >
+                          <span>詳細</span>
+                          <ArrowUpRight className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-3 p-2.5 rounded-xl bg-dark-bg/50 border border-dark-border text-[10px] text-gray-400 font-mono leading-relaxed flex items-start gap-1.5">
+                <span className="mt-0.5">💡</span>
+                <span>
+                  トップページの各アーティストカードおよび「出演者一覧」から、<strong className="text-white">「PayPayで応援」</strong>ボタンを押して個別に応援することができます。
+                  直接PayPayアプリで送金される場合は、メモ欄に<span className="text-white font-bold">「アーティスト名キーワード（例: DJ DUNE / KASSIS）」</span>を記載いただけると、目標達成の進捗確認に大変役立ちます！
+                </span>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Featured Artists Section / Coming Next placeholder */}
       <div>
         <div className="flex items-center justify-between mb-4">

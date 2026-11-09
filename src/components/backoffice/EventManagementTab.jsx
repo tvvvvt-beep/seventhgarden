@@ -105,6 +105,24 @@ export default function EventManagementTab({ onEventUpdated }) {
     );
   };
 
+  // 自己実現ゴール項目の変更
+  const updateSupportGoal = (id, field, value) => {
+    setArtists((prev) =>
+      prev.map((a) => {
+        if (a.id === id) {
+          return {
+            ...a,
+            supportGoal: {
+              ...(a.supportGoal || {}),
+              [field]: value,
+            },
+          };
+        }
+        return a;
+      })
+    );
+  };
+
   // 新規アーティストの追加
   const handleAddArtist = () => {
     const newId = `artist_${Date.now()}`;
@@ -276,7 +294,7 @@ export default function EventManagementTab({ onEventUpdated }) {
             <div>
               <h3 className="text-sm font-extrabold text-white">出演アーティスト＆タイムテーブル</h3>
               <p className="text-[10px] text-gray-400 font-mono">
-                タイムテーブル順・プロフィール・SNS設定
+                タイムテーブル順・プロフィール・SNS/PayPay目標設定
               </p>
             </div>
           </div>
@@ -424,20 +442,55 @@ export default function EventManagementTab({ onEventUpdated }) {
                       />
                     </div>
 
-                    {/* SNS設定 (per-artist PayPayゴール設定は廃止済み) */}
+                    {/* SNS & 自己実現 / PayPay Goal Setting */}
                     <div className="p-3 bg-neon-yellow/5 border border-neon-yellow/20 rounded-xl space-y-2">
                       <span className="text-[10px] font-mono font-bold text-neon-yellow block">
-                        SNS (任意)
+                        自己実現ゴール・PayPay / SNS設定 (任意)
                       </span>
-                      <div className="space-y-0.5">
-                        <label className="text-[9px] text-gray-400">Instagram ID</label>
-                        <input
-                          type="text"
-                          value={artist.sns?.instagram || ""}
-                          onChange={(e) => updateArtist(artist.id, "sns", { instagram: e.target.value })}
-                          placeholder="username"
-                          className="w-full bg-dark-surface border border-dark-border rounded-lg px-2 py-1 text-[11px] text-white font-mono"
-                        />
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-0.5 col-span-2 md:col-span-1">
+                          <label className="text-[9px] text-gray-400">目標・プロジェクト名 (例: 機材レンズ購入支援)</label>
+                          <input
+                            type="text"
+                            value={artist.supportGoal?.title || ""}
+                            onChange={(e) => updateSupportGoal(artist.id, "title", e.target.value)}
+                            placeholder="例: DJ DUNE 機材カメラレンズ購入支援"
+                            className="w-full bg-dark-surface border border-dark-border rounded-lg px-2 py-1 text-[11px] text-white font-bold"
+                          />
+                        </div>
+
+                        <div className="space-y-0.5">
+                          <label className="text-[9px] text-gray-400">目標金額 (例: ¥150,000)</label>
+                          <input
+                            type="text"
+                            value={artist.supportGoal?.amount || ""}
+                            onChange={(e) => updateSupportGoal(artist.id, "amount", e.target.value)}
+                            placeholder="例: ¥150,000"
+                            className="w-full bg-dark-surface border border-dark-border rounded-lg px-2 py-1 text-[11px] text-white font-mono"
+                          />
+                        </div>
+
+                        <div className="space-y-0.5">
+                          <label className="text-[9px] text-gray-400">送金メモキーワード</label>
+                          <input
+                            type="text"
+                            value={artist.supportGoal?.memoKeyword || ""}
+                            onChange={(e) => updateSupportGoal(artist.id, "memoKeyword", e.target.value)}
+                            placeholder="例: DJ DUNE レンズ"
+                            className="w-full bg-dark-surface border border-dark-border rounded-lg px-2 py-1 text-[11px] text-white font-mono"
+                          />
+                        </div>
+
+                        <div className="space-y-0.5">
+                          <label className="text-[9px] text-gray-400">Instagram ID</label>
+                          <input
+                            type="text"
+                            value={artist.sns?.instagram || ""}
+                            onChange={(e) => updateArtist(artist.id, "sns", { instagram: e.target.value })}
+                            placeholder="username"
+                            className="w-full bg-dark-surface border border-dark-border rounded-lg px-2 py-1 text-[11px] text-white font-mono"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
