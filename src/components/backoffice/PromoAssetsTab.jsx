@@ -24,7 +24,7 @@ export default function PromoAssetsTab() {
       id: "official_flyer_1112",
       category: "image",
       title: "公式フライヤー 11/12（最新オフィシャルポスター）",
-      subtitle: "Vol.4 IN MEMORIAM: JUAN ATKINS 全出演者掲載ポスター",
+      subtitle: "Vol.4 全出演者掲載ポスター",
       path: "/promo/7th_garden_1112_flyer.jpg",
       format: "JPG / 正方形ポスター (1504x1504)",
       tag: "最新公式ポスター",

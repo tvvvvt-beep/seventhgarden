@@ -4,7 +4,7 @@ export const EVENT_INFO = {
   date: "2026.11.12 (THU)",
   openTime: "18:00 - 24:00",
   venue: "Compufunk Records & BAR SPACE (OSAKA)",
-  description: "フリーなバイブスと、ディープな音。そこに現れるクールな庭、7th GARDEN。今回はデトロイト・テクノの先駆者、ホアン・アトキンスへの追悼を込めて。レジデントが育んだこの「庭」に新たに加わるゲストや、初期ダムタイプを手がける toru yamanaka がコアを稼働させる。DJとギャラリーの境界なく、誰もが等しく、ただそこに佇める庭へ。",
+  description: "フリーなバイブスと、ディープな音。そこに現れるクールな庭、7th GARDEN。レジデントが育んだこの「庭」に新たに加わるゲストや、初期ダムタイプを手がける toru yamanaka がコアを稼働させる。DJとギャラリーの境界なく、誰もが等しく、ただそこに佇める庭へ。",
   entranceFee: "Charge Free",
   hashtag: "#7thGarden #CompuFunk #Vol4"
 };
