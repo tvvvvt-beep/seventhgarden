@@ -113,6 +113,19 @@ export const INITIAL_ARTISTS = [
     totalPoints: 0,
     likesCount: 0,
     sns: {}
+  },
+  {
+    id: "v4_artist_9",
+    name: "COMPUFUNKRECORDS",
+    roleLabel: "SOUND / SPACE",
+    genre: "SOUND / SPACE",
+    stage: "MAIN STAGE",
+    time: "SOUND",
+    duration: "SOUND",
+    bio: "素晴らしいサウンドと居心地のよい空間を創出してくれる",
+    totalPoints: 0,
+    likesCount: 0,
+    sns: {}
   }
 ];
 
