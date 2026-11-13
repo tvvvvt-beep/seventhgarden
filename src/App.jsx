@@ -17,7 +17,7 @@ function MainApp() {
   const { currentUser, userProfile } = useAuth();
   
   const [activeTab, setActiveTab] = useState("home"); // home | lineup | feed | mypage | detail
-  const [activeEventTab, setActiveEventTab] = useState("vol_4"); // vol_4 | vol_3 | vol_2
+  const [activeEventTab, setActiveEventTab] = useState("vol_4_next"); // vol_4_next | vol_4 | vol_3 | vol_2
   const [artists, setArtists] = useState([]);
   const [tips, setTips] = useState([]);
   

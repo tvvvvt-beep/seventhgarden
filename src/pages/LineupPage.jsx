@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import ArtistCard from "../components/ArtistCard";
-import { Clock, Disc, Sparkles, History, Calendar, MapPin } from "lucide-react";
+import { Clock, Disc, Sparkles, History, Calendar, MapPin, Camera, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { PAST_EVENTS, EVENT_INFO } from "../firebase/mockData";
 
 export default function LineupPage({ artists, onOpenTipModal, onSelectArtist, activeEventTab = "vol_4", setActiveEventTab }) {
   const [currentEvent, setCurrentEvent] = useState(activeEventTab);
   const [searchQuery, setSearchQuery] = useState("");
+  const [lightboxIdx, setLightboxIdx] = useState(null);
 
   React.useEffect(() => {
     setCurrentEvent(activeEventTab);
@@ -18,8 +19,9 @@ export default function LineupPage({ artists, onOpenTipModal, onSelectArtist, ac
     }
   };
 
-  const isUpcoming = currentEvent === "vol_4";
+  const isUpcoming = currentEvent === "vol_4_next";
   const pastEvent = PAST_EVENTS.find(e => e.id === currentEvent) || null;
+  const archivePhotos = pastEvent?.photos || [];
 
   const currentArtistsList = isUpcoming ? artists : (pastEvent?.artists || []);
 
@@ -46,9 +48,9 @@ export default function LineupPage({ artists, onOpenTipModal, onSelectArtist, ac
       </div>
 
       {/* Event Selection Tabs */}
-      <div className={`grid gap-2 p-1.5 bg-dark-surface rounded-2xl border border-dark-border ${PAST_EVENTS.length > 1 ? "grid-cols-3" : "grid-cols-2"}`}>
+      <div className={`grid gap-2 p-1.5 bg-dark-surface rounded-2xl border border-dark-border ${PAST_EVENTS.length > 2 ? "grid-cols-2" : PAST_EVENTS.length > 1 ? "grid-cols-3" : "grid-cols-2"}`}>
         <button
-          onClick={() => handleTabChange("vol_4")}
+          onClick={() => handleTabChange("vol_4_next")}
           className={`flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl font-mono text-xs font-bold transition-all ${
             isUpcoming
               ? "bg-gradient-to-r from-neon-pink/80 to-neon-purple/80 text-white shadow-neon-pink"
@@ -95,6 +97,35 @@ export default function LineupPage({ artists, onOpenTipModal, onSelectArtist, ac
               <Clock className="w-3 h-3 text-purple-400" />
               {pastEvent.openTime}
             </span>
+          </div>
+        </div>
+      )}
+
+      {/* Event Photo Gallery (archive entries with photos) */}
+      {archivePhotos.length > 0 && !searchQuery && (
+        <div className="rounded-2xl bg-dark-card/50 border border-dark-border p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-neon-cyan">
+              <Camera className="w-3.5 h-3.5" />
+              EVENT PHOTOS — {pastEvent.vol} ARCHIVE
+            </span>
+            <span className="text-[10px] font-mono text-gray-500">{archivePhotos.length} PHOTOS</span>
+          </div>
+          <div className="grid grid-cols-3 gap-1.5">
+            {archivePhotos.map((src, i) => (
+              <button
+                key={src}
+                onClick={() => setLightboxIdx(i)}
+                className="aspect-square rounded-lg overflow-hidden border border-dark-border hover:border-neon-pink/60 transition-all"
+              >
+                <img
+                  src={src}
+                  alt={`${pastEvent.id} photo ${i + 1}`}
+                  loading="lazy"
+                  className="w-full h-full object-cover"
+                />
+              </button>
+            ))}
           </div>
         </div>
       )}
@@ -171,6 +202,45 @@ export default function LineupPage({ artists, onOpenTipModal, onSelectArtist, ac
           </div>
         )}
       </div>
+
+      {/* Photo Lightbox */}
+      {lightboxIdx !== null && archivePhotos[lightboxIdx] && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-fadeIn"
+          onClick={() => setLightboxIdx(null)}
+        >
+          <button
+            onClick={() => setLightboxIdx(null)}
+            className="absolute top-4 right-4 p-2 rounded-full bg-dark-surface/80 text-gray-300 hover:text-white border border-dark-border"
+            aria-label="閉じる"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); setLightboxIdx((lightboxIdx - 1 + archivePhotos.length) % archivePhotos.length); }}
+            className="absolute left-2 sm:left-6 p-2 rounded-full bg-dark-surface/80 text-gray-300 hover:text-white border border-dark-border"
+            aria-label="前へ"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <img
+            src={archivePhotos[lightboxIdx]}
+            alt={`archive photo ${lightboxIdx + 1}`}
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-full max-h-[82vh] rounded-xl shadow-neon-purple object-contain"
+          />
+          <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[11px] font-mono text-gray-400 bg-dark-surface/80 px-3 py-1 rounded-full border border-dark-border">
+            {lightboxIdx + 1} / {archivePhotos.length}
+          </span>
+          <button
+            onClick={(e) => { e.stopPropagation(); setLightboxIdx((lightboxIdx + 1) % archivePhotos.length); }}
+            className="absolute right-2 sm:right-6 p-2 rounded-full bg-dark-surface/80 text-gray-300 hover:text-white border border-dark-border"
+            aria-label="次へ"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
